@@ -83,11 +83,19 @@ mvn -version
 
 You should see reference to the MAVEN version you have just installed plus the JDK 6 that is using.
 
-3. Get module from bitbucket
--------------------------
+3. Get module source code
+--------------------------
+
+ixa-pipe-tok original repo is hosted at Bitbucket, and can be cloned as follows:
 
 ````shell
-hg clone ssh://hg@bitbucket.org/ragerri/ixa-pipe-parse
+hg clone ssh://hg@bitbucket.org/ragerri/ixa-pipe-tok
+````
+
+If you are a github user, we provide a github mirror of the original repo:
+
+````shell
+git clone git@github.com:ragerri/ixa-pipe-tok.git
 ````
 
 4. Download trained models
@@ -96,7 +104,7 @@ hg clone ssh://hg@bitbucket.org/ragerri/ixa-pipe-parse
 You will need to download the trained parser models for the module to work properly. Go to:
 
 ````shell
-http://ixa2.si.ehu.es/ragerri/ixa-pipe-models
+http://ixa3.si.ehu.es/~ragerri/ixa-pipeline-models/
 ````
 
 Download en-parser-chunking.bin and es-parser-chunking.bin and copy them to ixa-pipe-parse/src/main/resources/.
@@ -133,13 +141,17 @@ mvn clean install
 7. USING ixa-pipe-parse
 ==========================
 
-The program takes KAF documents (with <wf> elements) as standard input and outputs syntactic analysis
-in treebank format.
+The program takes tokenized text in KAF form (e.g., <wf> elements) as standard input and outputs syntactic analysis
+in treebank format to standard output.
+
+http://kyoto-project.eu/www2.let.vu.nl/twiki/pub/Kyoto/TechnicalPapers/WP002_TR009_KAF_Framework.pdf
+
+The tokenized text in <wf> KAF elements can be obtained by running ixa-pipe-tok.
 
 To run the program execute:
 
 ````shell
-cat wfterms.kaf | java -jar $PATH/target/ixa-pipe-parse-1.0.jar
+cat wordforms.kaf | java -jar $PATH/target/ixa-pipe-parse-1.0.jar
 ````
 
 GENERATING JAVADOC
