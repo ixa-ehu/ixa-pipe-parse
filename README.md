@@ -104,7 +104,7 @@ git clone git@github.com:ragerri/ixa-pipe-tok.git
 You will need to download the trained parser models for the module to work properly. Go to:
 
 ````shell
-http://ixa3.si.ehu.es/~ragerri/ixa-pipeline-models/
+http://ixa2.si.ehu.es/ragerri/ixa-pipeline-models/
 ````
 
 Download en-parser-chunking.bin and es-parser-chunking.bin and copy them to ixa-pipe-parse/src/main/resources/.
