@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ixa</groupId>
-  <artifactId>ixa-opennlp-parse</artifactId>
-  <name>ixa-opennlp-parse</name>
+  <artifactId>ixa-pipe-parse</artifactId>
+  <name>ixa-pipe-parse</name>
   <version>1.0</version>
-  <description>Multilingual Natural Language Processing Pipeline based on Apache OpenNLP API.
+  <description>ixa-pipe-parse is part of IXA-pipeline and is based on Apache OpenNLP API.
 	In principle the pipeline is available for the annotation of English and Spanish texts, but it can be easily extended to
 	deal with other languages too. All models have been trained by the IXA NLP Group of the University of the
 	Basque Country (ixa.si.ehu.es). This particular module performs Constituent parsing for English.</description>
@@ -35,7 +35,7 @@
               <transformers>
                 <transformer>
                   <manifestEntries>
-                    <Main-Class>ixa.opennlp.parse.CLI</Main-Class>
+                    <Main-Class>ixa.pipe.parse.CLI</Main-Class>
                   </manifestEntries>
                 </transformer>
               </transformers>
@@ -51,7 +51,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
         <configuration>
-          <mainClass>ixa.opennlp.parse.CLI</mainClass>
+          <mainClass>ixa.pipe.parse.CLI</mainClass>
         </configuration>
       </plugin>
       <plugin>
@@ -60,12 +60,6 @@
       </plugin>
     </plugins>
   </build>
-  <repositories>
-    <repository>
-      <id>org.apache.opennlp</id>
-      <url>https://repository.apache.org/content/groups/snapshots</url>
-    </repository>
-  </repositories>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
