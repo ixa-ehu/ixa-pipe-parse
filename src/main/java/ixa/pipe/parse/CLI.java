@@ -164,7 +164,7 @@ public class CLI {
         }
 
         // parse with heads
-        bwriter.write(annotator.getConstituentParse(wfs, headFinder));
+        bwriter.write(annotator.getConstituenParseWithHeads(wfs, headFinder));
       }
         // parse without heads
       else {
