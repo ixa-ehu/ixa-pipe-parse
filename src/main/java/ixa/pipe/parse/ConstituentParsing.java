@@ -45,9 +45,9 @@ public class ConstituentParsing {
    * then it initializes the nercModel and finally it creates a nercDetector
    * using such model.
    */
-  public ConstituentParsing() {
+  public ConstituentParsing(InputStream trainedModel) {
 
-    InputStream trainedModel = getClass().getResourceAsStream("/en-parser-chunking.bin");
+    //InputStream trainedModel = getClass().getResourceAsStream("/en-parser-chunking.bin");
 
     try {
       parserModel = new ParserModel(trainedModel);
@@ -80,5 +80,5 @@ public class ConstituentParsing {
     Parse parsedSentence[] = ParserTool.parseLine(sentence, parser, numParsers);
     return parsedSentence;
   }
-
+  
 }

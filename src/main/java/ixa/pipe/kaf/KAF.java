@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package ixa.pipe.parse;
+package ixa.pipe.kaf;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +29,26 @@ import org.jdom2.Text;
 
 public class KAF {
 
+  /**
+   * It reads the linguisticProcessor elements and adds them to the KAF
+   * document.
+   * 
+   * @param lingProc
+   * @param kaf
+   */
+  public void addKafHeader(List<Element> lingProc, KAF kaf) {
+    String layer = null;
+    for (int i = 0; i < lingProc.size(); i++) {
+      layer = lingProc.get(i).getAttributeValue("layer");
+      List<Element> lps = lingProc.get(i).getChildren("lp");
+      for (Element lp : lps) {
+        kaf.addlps(layer, lp.getAttributeValue("name"),
+            lp.getAttributeValue("timestamp"), lp.getAttributeValue("version"));
+      }
+    }
+  }
+  
+  
   /**
    * 
    * Generates timestamp in UTC atomic format.
@@ -59,7 +79,10 @@ public class KAF {
   class WordForm {
     public String id;
     public String form;
+    public String offset;
+    public String length;
     public String sent;
+    public String para;
   }
 
   class Term {
@@ -68,7 +91,8 @@ public class KAF {
     public String pos;
     public String lemma;
     public String type;
-	public String spanString;
+    public String spanString;
+    public String morphofeat;
   }
 
   class Entity {
@@ -82,6 +106,7 @@ public class KAF {
    * Class members
    */
 
+  private String lang;
   ArrayList<LinguisticProcessor> lps;
   ArrayList<WordForm> wfs;
   ArrayList<Term> terms;
@@ -90,7 +115,8 @@ public class KAF {
   /*
    * Constructor: it initializes the class' member arrays
    */
-  public KAF() {
+  public KAF(String cmdOption) {
+    this.lang = cmdOption;
     this.lps = new ArrayList<LinguisticProcessor>();
     this.wfs = new ArrayList<WordForm>();
     this.terms = new ArrayList<Term>();
@@ -111,27 +137,32 @@ public class KAF {
     this.lps.add(lp);
   }
 
-  public void addWf(String id, String sent, String form) {
+  public void addWf(String id, String sent, String offset, String tokLength, String para, String form) {
     WordForm wf = new WordForm();
     wf.id = id;
     wf.sent = sent;
+    wf.offset = offset;
+    wf.length = tokLength;
+    wf.para = para;
     wf.form = form;
     this.wfs.add(wf);
   }
 
   public void addTerm(String id, String pos, String type, String lemma,
-      ArrayList<String> tokenIds, String spanString) {
+      ArrayList<String> tokenIds, String spanString, String posTag) {
     Term term = new Term();
     term.id = id;
-    term.pos = pos;
+    term.pos = pos; // kaf postag
     term.lemma = lemma;
     term.type = type;
     term.tokens = tokenIds;
     term.spanString = spanString;
+    term.morphofeat = posTag; // penn treebank postag
     this.terms.add(term);
   }
 
-  public void addEntity(String id, String type, ArrayList<String> termIds, String neString) {
+  public void addEntity(String id, String type, ArrayList<String> termIds,
+      String neString) {
     Entity entity = new Entity();
     entity.id = id;
     entity.type = type;
@@ -183,7 +214,7 @@ public class KAF {
     try {
 
       Element root = new Element("KAF");
-      root.setAttribute("lang", "en", Namespace.XML_NAMESPACE);
+      root.setAttribute("lang", this.lang, Namespace.XML_NAMESPACE);
       root.setAttribute("version", "v1.opener");
 
       Element header = new Element("kafHeader");
@@ -204,6 +235,9 @@ public class KAF {
         Element wfElem = new Element("wf");
         wfElem.setAttribute("wid", wf.id);
         wfElem.setAttribute("sent", wf.sent);
+        wfElem.setAttribute("offset", wf.offset);
+        wfElem.setAttribute("length", wf.length);
+        wfElem.setAttribute("para", wf.para);
         Text wfFormTxtNode = new Text(wf.form);
         wfElem.addContent(wfFormTxtNode);
         wfList.addContent(wfElem);
@@ -215,6 +249,7 @@ public class KAF {
         Element termElem = new Element("term");
         termElem.setAttribute("tid", term.id);
         termElem.setAttribute("pos", term.pos);
+        termElem.setAttribute("morphofeat", term.morphofeat);
         termElem.setAttribute("lemma", term.lemma);
         termElem.setAttribute("type", term.type);
         Element spanElem = new Element("span");
