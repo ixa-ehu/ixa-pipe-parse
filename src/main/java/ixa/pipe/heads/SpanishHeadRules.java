@@ -130,8 +130,8 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
       }
       for (int ci = 0; ci < constituents.length; ci++) {
         //if (constituents[ci].getType().equals("SN")) {
-          if (constituents[ci].getType().startsWith("SN") || constituents[ci].getType().startsWith("GRUP.NOM")) {
-          return constituents[ci];
+          if (constituents[ci].getType().startsWith("SN") || constituents[ci].getType().startsWith("GRUP.NOM")) {        
+            return constituents[ci];
         }
       }
       String[] tags2 = { "$", "SA","S.A","GRUP.A" };
