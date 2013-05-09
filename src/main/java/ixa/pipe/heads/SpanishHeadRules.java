@@ -114,7 +114,8 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
       return null;
     }
     HeadRule hr;
-    if (type.equals("SN") || type.equals("GRUP.NOM")) {
+    //if (type.equals("SN") || type.equals("GRUP.NOM")) {
+    if (type.startsWith("SN") || type.startsWith("GRUP.NOM")) {
       String[] tags1 = { "NCMS000", "NCFS000", "NCCS000", "NCMS00D", "NCMS00A", "NCFS00D","NCFS00A", "NCCS00A", "NCCS00D", 
     		  "NP0000", "NCMP000", "NCFP000", "NCCP000", "NCMP00D", "NCMP00A", "NCFP00D","NCFP00A", "NCCP00A", "NCCP00D", 
     		  "GRUP.NOM", "AQAMS0","AQAFS0","AQACS0", "AQAMN0", "AQAFN0", "AQACN0", "AQAMP0","AQAFP0","AQACP0",
@@ -128,7 +129,8 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
         }
       }
       for (int ci = 0; ci < constituents.length; ci++) {
-        if (constituents[ci].getType().equals("SN")) {
+        //if (constituents[ci].getType().equals("SN")) {
+          if (constituents[ci].getType().startsWith("SN") || constituents[ci].getType().startsWith("GRUP.NOM")) {
           return constituents[ci];
         }
       }
