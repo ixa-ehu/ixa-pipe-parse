@@ -164,8 +164,8 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
         for (int ti = 0; ti < tl; ti++) {
           for (int ci = 0; ci < cl; ci++) {
         	  // TODO: Examine this function closely are we infra-heading or over-heading?
-            //if (constituents[ci].getType().equals(tags[ti]) || constituents[ci].getType().startsWith(tags[ti])) {
-        	 if (constituents[ci].getType().equals(tags[ti])) {
+            if (constituents[ci].getType().equals(tags[ti]) || constituents[ci].getType().startsWith(tags[ti])) {
+        	// if (constituents[ci].getType().equals(tags[ti])) {
               return constituents[ci];
             }
           }
