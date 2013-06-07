@@ -153,7 +153,7 @@ public class CLI {
       }
         // parse without heads
       else {
-        //bwriter.write(annotator.getConstituentParse(kaf));
+        bwriter.write(annotator.getConstituentParse(kaf));
       }
 
       bwriter.close();
