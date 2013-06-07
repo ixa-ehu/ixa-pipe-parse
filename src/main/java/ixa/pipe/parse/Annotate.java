@@ -19,17 +19,18 @@ package ixa.pipe.parse;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import opennlp.tools.parser.Parse;
 
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-
+import ixa.kaflib.KAFDocument;
+import ixa.kaflib.WF;
 import ixa.pipe.heads.HeadFinder;
-import ixa.pipe.kaf.KAFUtils;
 import ixa.pipe.parse.Models;
 
 /**
@@ -39,14 +40,12 @@ import ixa.pipe.parse.Models;
 public class Annotate {
 
   private ConstituentParsing parser;
-  private KAFUtils kafUtils;
   private Models modelRetriever;
 
   public Annotate(String lang) {
 	modelRetriever = new Models();
 	InputStream parseModel = modelRetriever.getParseModel(lang);
     parser = new ConstituentParsing(parseModel);
-    kafUtils = new KAFUtils();
   }
     
   private String getSentenceFromTokens(String[] tokens) { 
@@ -69,22 +68,20 @@ public class Annotate {
  * @throws JDOMException 
    */
 
-  public String getConstituentParseWithHeads(
-      List<Element> wfs, HeadFinder headFinder) throws IOException, JDOMException {
+  public String getConstituentParseWithHeads(KAFDocument kaf, HeadFinder headFinder) throws IOException {
 	  
-	  LinkedHashMap<String, List<String>> sentencesMap = kafUtils
-	            .getSentencesMap(wfs);
-	      LinkedHashMap<String, List<String>> sentTokensMap = kafUtils
-	            .getSentsFromWfs(sentencesMap, wfs);
-
-    StringBuffer parsingDoc = new StringBuffer();
-	for (Map.Entry<String, List<String>> sentence : sentTokensMap.entrySet()) {
-      String[] tokens = sentence.getValue().toArray(
-          new String[sentence.getValue().size()]);
+	StringBuffer parsingDoc = new StringBuffer();
+	List<List<WF>> sentences = kaf.getSentences();
+	for (List<WF> sentence: sentences) {
+	//get array of token forms from a list of WF objects
+      String[] tokens = new String[sentence.size()];
+      for (int i=0; i < sentence.size(); i++) { 
+        tokens[i] = sentence.get(i).getForm();
+      }
       
       // Constituent Parsing
-      String sent = this.getSentenceFromTokens(tokens);
-      Parse parsedSentence[] = parser.parse(sent,1);
+     String sent = this.getSentenceFromTokens(tokens);
+     Parse parsedSentence[] = parser.parse(sent,1);
       for(Parse parse:parsedSentence){
       	headFinder.printHeads(parse);
       }
@@ -92,9 +89,8 @@ public class Annotate {
     	  parsedSent.show(parsingDoc);
     	  parsingDoc.append("\n");
       }
-      }
+     }
 	return parsingDoc.toString();
-
     }
   
   /**
@@ -107,18 +103,15 @@ public class Annotate {
  * @throws JDOMException 
    */
 
-  public String getConstituentParse(
-      List<Element> wfs) throws IOException, JDOMException {
-      
-      LinkedHashMap<String, List<String>> sentencesMap = kafUtils
-                .getSentencesMap(wfs);
-          LinkedHashMap<String, List<String>> sentTokensMap = kafUtils
-                .getSentsFromWfs(sentencesMap, wfs);
-
-    StringBuffer parsingDoc = new StringBuffer();
-    for (Map.Entry<String, List<String>> sentence : sentTokensMap.entrySet()) {
-      String[] tokens = sentence.getValue().toArray(
-          new String[sentence.getValue().size()]);
+   public String getConstituentParse(KAFDocument kaf) throws IOException {
+       
+     StringBuffer parsingDoc = new StringBuffer();
+     List<List<WF>> sentences = kaf.getSentences();
+     for (List<WF> sentence : sentences) { 
+       String [] tokens = new String[sentence.size()];
+       for (int i=0; i < sentence.size(); i++) { 
+         tokens[i] = sentence.get(i).getForm();
+       }
       
       // Constituent Parsing
       String sent = this.getSentenceFromTokens(tokens);
@@ -132,5 +125,7 @@ public class Annotate {
 
     }
   
+  
+
 
 }

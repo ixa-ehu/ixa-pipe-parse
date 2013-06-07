@@ -17,26 +17,22 @@
 package ixa.pipe.parse;
 
 
+import ixa.kaflib.KAFDocument;
+import ixa.pipe.heads.CollinsHeadFinder;
+import ixa.pipe.heads.HeadFinder;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.List;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import org.jdom2.Element;
 import org.jdom2.JDOMException;
-
-import ixa.pipe.heads.CollinsHeadFinder;
-import ixa.pipe.heads.HeadFinder;
-import ixa.pipe.kaf.KAFReader;
 
 /**
  * EHU-OpenNLP Constituent Parsing using Apache OpenNLP.
@@ -114,25 +110,14 @@ public class CLI {
 
     // construct kaf Reader and read from standard input
     Annotate annotator = new Annotate(lang);
-    KAFReader kafReader = new KAFReader();
-    StringBuilder sb = new StringBuilder();
     BufferedReader breader = null;
     BufferedWriter bwriter = null;
     
     try {
       breader = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
       bwriter = new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
-      String line;
-      while ((line = breader.readLine()) != null) {
-        sb.append(line);
-      }
-
-      // read KAF from standard input
-      InputStream kafIn = new ByteArrayInputStream(sb.toString().getBytes(
-          "UTF-8"));
-      Element rootNode = kafReader.getRootNode(kafIn);
-      List<Element> wfs = kafReader.getWfs(rootNode);
-
+      KAFDocument kaf = KAFDocument.createFromStream(breader);
+      
       // choosing HeadFinder: (Collins rules for English and derivations of it
       // for other languages; sem (Semantic headFinder re-implemented from
       // Stanford CoreNLP).
@@ -164,11 +149,11 @@ public class CLI {
         }
 
         // parse with heads
-        bwriter.write(annotator.getConstituentParseWithHeads(wfs, headFinder));
+        bwriter.write(annotator.getConstituentParseWithHeads(kaf, headFinder));
       }
         // parse without heads
       else {
-        bwriter.write(annotator.getConstituentParse(wfs));
+        //bwriter.write(annotator.getConstituentParse(kaf));
       }
 
       bwriter.close();
