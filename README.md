@@ -2,8 +2,10 @@
 IXA-pipe-parse
 =================
 
-This module uses Apache OpenNLP programatically to provide Constituent Parsing
-for English and Spanish. English models have been trained using Penn treebank.
+This module uses Apache OpenNLP programatically to train and provide Constituent Parsing
+models for English and Spanish. English models have been trained using the Penn treebank and Spanish models
+using the Ancora corpus (http://clic.ub.edu/corpus/en/ancora).
+
 This module is part of IXA-Pipeline ("is a pipeline"), a multilingual NLP pipeline
 developed by the IXA NLP Group (ixa.si.ehu.es).
 
