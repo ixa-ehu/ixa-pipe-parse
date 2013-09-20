@@ -2,8 +2,10 @@
 IXA-pipe-parse
 =================
 
-This module uses Apache OpenNLP programatically to provide Constituent Parsing
-for English and Spanish. English models have been trained using Penn treebank.
+This module uses Apache OpenNLP programatically to train and provide Constituent Parsing
+models for English and Spanish. English models have been trained using the Penn treebank and Spanish models
+using the Ancora corpus (http://clic.ub.edu/corpus/en/ancora).
+
 This module is part of IXA-Pipeline ("is a pipeline"), a multilingual NLP pipeline
 developed by the IXA NLP Group (ixa.si.ehu.es).
 
@@ -86,29 +88,22 @@ You should see reference to the MAVEN version you have just installed plus the J
 3. Get module source code
 --------------------------
 
-ixa-pipe-tok original repo is hosted at Bitbucket, and can be cloned as follows:
-
 ````shell
-hg clone ssh://hg@bitbucket.org/ragerri/ixa-pipe-tok
-````
-
-If you are a github user, we provide a github mirror of the original repo:
-
-````shell
-git clone git@github.com:ragerri/ixa-pipe-tok.git
+git clone git@github.com:ixa-ehu/ixa-pipe-parse.git
 ````
 
 4. Download trained models
 --------------------------
 
-You will need to download the trained parser models for the module to work properly. Go to:
+You will need to download the trained parser models for the module to work properly. Download the models
+and untar the archive into the src/main/resources directory:
 
 ````shell
-http://ixa2.si.ehu.es/ragerri/ixa-pipeline-models/
+cd ixa-pipe-parse/src/main/resources
+wget http://ixa2.si.ehu.es/ragerri/ixa-pipeline-models/parser-resources.tgz
+tar xvzf parser-resources.tgz
 ````
-
-Download en-parser-chunking.bin and es-parser-chunking.bin and copy them to ixa-pipe-parse/src/main/resources/.
-Note that if you change the name of the models you will need to modify accordingly the source code in Models.java.
+Note that if you change the name of the models you will need to modify also the source code in Models.java.
 
 5. Move into main directory
 ---------------------------
