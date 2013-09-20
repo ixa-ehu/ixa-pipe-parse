@@ -28,7 +28,7 @@ import java.util.TreeSet;
 
 import opennlp.tools.parser.Parse;
 
-import ixa.kaflib.KAFDocument;
+import ixa.kaflib.*;
 import ixa.kaflib.WF;
 import ixa.pipe.heads.HeadFinder;
 import ixa.pipe.parse.Models;
@@ -121,9 +121,14 @@ public class Annotate {
           parsingDoc.append("\n");
       }
       }
-    return parsingDoc.toString();
-
+     try {
+	 kaf.addConstituencyFromParentheses(parsingDoc.toString());
+     } catch (Exception e) {
+	 e.printStackTrace();
+     }
+     return kaf.toString();
     }
+
   
   
 
