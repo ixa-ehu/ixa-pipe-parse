@@ -117,6 +117,7 @@ public class CLI {
       breader = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
       bwriter = new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
       KAFDocument kaf = KAFDocument.createFromStream(breader);
+      kaf.addLinguisticProcessor("constituency", "ixa-pipe-parse-"+lang, "1.0");
       
       // choosing HeadFinder: (Collins rules for English and derivations of it
       // for other languages; sem (Semantic headFinder re-implemented from
