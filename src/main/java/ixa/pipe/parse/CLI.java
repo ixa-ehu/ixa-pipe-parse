@@ -35,8 +35,13 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import org.jdom2.JDOMException;
 
 /**
- * EHU-OpenNLP Constituent Parsing using Apache OpenNLP.
+ * ixa-pipe-parse: Constituent Parsing: 
  * 
+ *  - Using Apache OpenNLP for training and deploying models. 
+ *  - Providing extra support for Collins and Semantic Head Finder, 
+ *    useful for coreference resolution, for example. 
+ *   - Outputs KAF. 
+ *    
  * @author ragerri
  * @version 1.0
  * 
