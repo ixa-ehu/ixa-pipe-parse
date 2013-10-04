@@ -90,7 +90,13 @@ public class Annotate {
     	  parsingDoc.append("\n");
       }
      }
-	return parsingDoc.toString();
+	try {
+	 kaf.addConstituencyFromParentheses(parsingDoc.toString());
+     } catch (Exception e) {
+	 e.printStackTrace();
+     }
+     //return parsingDoc.toString();
+     return kaf.toString();
     }
 
   /**
@@ -126,6 +132,7 @@ public class Annotate {
      } catch (Exception e) {
 	 e.printStackTrace();
      }
+     //return parsingDoc.toString();
      return kaf.toString();
     }
 
