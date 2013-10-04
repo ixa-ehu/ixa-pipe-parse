@@ -17,21 +17,17 @@
 package ixa.pipe.parse;
 
 
+import ixa.kaflib.KAFDocument;
+import ixa.kaflib.WF;
+import ixa.pipe.heads.HeadFinder;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import opennlp.tools.parser.Parse;
 
-import ixa.kaflib.*;
-import ixa.kaflib.WF;
-import ixa.pipe.heads.HeadFinder;
-import ixa.pipe.parse.Models;
+import org.jdom2.JDOMException;
 
 /**
  * @author ragerri
