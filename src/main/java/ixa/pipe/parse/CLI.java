@@ -82,7 +82,7 @@ public class CLI {
 
     parser
         .addArgument("-g", "--heads")
-        .choices("synt", "sem")
+        .choices("collins", "sem")
         .required(false)
         .help(
             "It is REQUIRED to choose a language to perform annotation with ixa-pipe-parse");
@@ -134,23 +134,23 @@ public class CLI {
       if (!headFinderOption.isEmpty()) {
         if (lang.equalsIgnoreCase("en")) {
 
-          if (headFinderOption.equalsIgnoreCase("synt")) {
-            headFinder = new CollinsHeadFinder(lang);
+          if (headFinderOption.equalsIgnoreCase("collins")) {
+            headFinder = new CollinsHeadFinder();
           } else {
         	  // headFinder = new SemanticHeadFinder(lang);
             System.err
                 .println("English Semantic Head Finder not yet available. Using Collins instead.");
-            headFinder = new CollinsHeadFinder(lang);
+            headFinder = new CollinsHeadFinder();
           }
         }
         if (lang.equalsIgnoreCase("es")) {
-          if (headFinderOption.equalsIgnoreCase("synt")) {
-            headFinder = new CollinsHeadFinder(lang);
+          if (headFinderOption.equalsIgnoreCase("collins")) {
+            //headFinder = new CollinsHeadFinder(lang);
           } else {
             // headFinder = new SemanticHeadFinder(lang);
             System.err
                 .println("Spanish Semantic Head Finder not available. Using Collins instead");
-            headFinder = new CollinsHeadFinder(lang);
+            //headFinder = new CollinsHeadFinder(lang);
           }
         }
 

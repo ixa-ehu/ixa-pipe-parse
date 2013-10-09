@@ -1,6 +1,5 @@
 /*
- *
- *Copyright 2013 Rodrigo Agerri and Aitor Garcia Pablos
+ * Copyright 2013 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,89 +14,85 @@
    limitations under the License.
  */
 
+
 package ixa.pipe.heads;
 
+import java.util.HashMap;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-
-import ixa.pipe.parse.Models;
-
-import opennlp.tools.parser.HeadRules;
-import opennlp.tools.parser.Parse;
+import edu.stanford.nlp.trees.Tree;
 
 /**
- * HeadFinder for constituent parse using Collins rules. These rules and the 
- * getHead() method in the language specific HeadRules classes (adapted from 
- * Collins' original head rules).   
+ * Class for storing the English head rules associated with parsing. The headrules
+ * are specified in $src/main/resources/en-head-rules
+ *  
+ * NOTE: This is the very same class than the one inside opennlp.tools.parser.lang.en. The only
+ * change is the return of the getHead() method: 
  * 
+ * Before: return constituents[ci].getHead(); Now: return constituents[ci];
  * 
- * @author ragerri
- *
+ * Other changes include removal of deprecated methods we do not need to use. 
+ * 
  */
-public class CollinsHeadFinder implements HeadFinder {
-	
-	private static HeadRules headRules;
-	/**
-	 * Constructor which reads the file $lang-head-rules at the root of classpath
-	 * The file is read only the first time an instance is loaded.
-	 * Every instance shares the same internal rules representation
-	 * 
-	 */
-	public CollinsHeadFinder(String lang) {
-		try{
-			if(headRules==null){
-				Models headFileRetriever = new Models();
-				//InputStream is=getClass().getResourceAsStream("/en-head-rules");
-				InputStream is = headFileRetriever.getHeadRulesFile(lang);
-				//headRules=new EnglishHeadRules(new InputStreamReader(is));
-				
-				if (lang.equalsIgnoreCase("en")) {
-					headRules=new EnglishHeadRules(new InputStreamReader(is));
-				}
-				if (lang.equalsIgnoreCase("es")) { 
-					headRules=new SpanishHeadRules(new InputStreamReader(is));
-				}
-				is.close();
-			}
-		}
-		catch(Exception e){
-			throw new RuntimeException(e);
-		}
-	}
-	
-	/**
-	 * Modifies the input Parse tree annotating the heads with 
-	 * '=H' according to every language specific HeadRules class. 
-	 * 
-	 * This function written by Aitor Garcia Pablos (Vicomtech).
-	 * 
-	 * @param parse
-	 */
-	public void printHeads(Parse parse){
-		LinkedList<Parse> nodes=new LinkedList<Parse>();
-		nodes.add(parse);
-		//This is a recursive iteration over the whole parse tree
-		while(!nodes.isEmpty()){
-			Parse currentNode=nodes.removeFirst();
-			//When a node is here its '=H' annotation has already happened
-			//so it '=H' has to be removed to match with the head rules
-			String type=currentNode.getType().replace("=H","");
-			Parse[] children=currentNode.getChildren();
-			Parse headChild=null;
-			if(children.length>0){
-				headChild=headRules.getHead(children, type);
-			}
-			//For every child, if it is the head, annotate with '=H'
-			//and also add to the queue for the recursive processing
-			for(Parse child:currentNode.getChildren()){
-				if(child==headChild){
-					child.setType(child.getType()+"=H");
-				}
-				nodes.addLast(child);
-			}
-		}
-	}
-	
+public class CollinsHeadFinder extends AbstractHeadFinder {
+
+  
+  public CollinsHeadFinder() {
+    super();
+    
+    headRules = new HashMap<String, HeadRule>();
+    // This version from Collins' diss (1999: 236-238)
+    headRules.put("ADJP", new HeadRule(new String[][]{{"left", "NNS", "QP", "NN", "$", "ADVP", "JJ", "VBN", "VBG", "ADJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}} ));
+    headRules.put("ADVP", new HeadRule(new String[][]{{"right", "RB", "RBR", "RBS", "FW", "ADVP", "TO", "CD", "JJR", "JJ", "IN", "NP", "JJS", "NN"}}));
+    headRules.put("CONJP", new HeadRule(new String[][]{{"right", "CC", "RB", "IN"}}));
+    headRules.put("FRAG", new HeadRule(new String[][]{{"right"}})); // crap
+    headRules.put("INTJ", new HeadRule(new String[][]{{"left"}}));
+    headRules.put("LST", new HeadRule(new String[][]{{"right", "LS", ":"}}));
+    headRules.put("NAC", new HeadRule(new String[][]{{"left", "NN", "NNS", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "FW"}}));
+    headRules.put("NX", new HeadRule(new String[][]{{"left"}})); // crap
+    headRules.put("PP", new HeadRule(new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW"}}));
+    // should prefer JJ? (PP (JJ such) (IN as) (NP (NN crocidolite)))
+    headRules.put("PRN", new HeadRule(new String[][]{{"left"}}));
+    headRules.put("PRT", new HeadRule(new String[][]{{"right", "RP"}}));
+    headRules.put("QP", new HeadRule(new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "RB", "DT", "CD", "NCD", "QP", "JJR", "JJS"}}));
+    headRules.put("RRC", new HeadRule(new String[][]{{"right", "VP", "NP", "ADVP", "ADJP", "PP"}}));
+    headRules.put("S", new HeadRule(new String[][]{{"left", "TO", "IN", "VP", "S", "SBAR", "ADJP", "UCP", "NP"}}));
+    headRules.put("SBAR", new HeadRule(new String[][]{{"left", "WHNP", "WHPP", "WHADVP", "WHADJP", "IN", "DT", "S", "SQ", "SINV", "SBAR", "FRAG"}}));
+    headRules.put("SBARQ", new HeadRule(new String[][]{{"left", "SQ", "S", "SINV", "SBARQ", "FRAG"}}));
+    headRules.put("SINV", new HeadRule(new String[][]{{"left", "VBZ", "VBD", "VBP", "VB", "MD", "VP", "S", "SINV", "ADJP", "NP"}}));
+    headRules.put("SQ", new HeadRule(new String[][]{{"left", "VBZ", "VBD", "VBP", "VB", "MD", "VP", "SQ"}}));
+    headRules.put("UCP", new HeadRule(new String[][]{{"right"}}));
+    headRules.put("VP", new HeadRule(new String[][]{{"left", "TO", "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "AUX", "AUXG", "VP", "ADJP", "NN", "NNS", "NP"}}));
+    headRules.put("WHADJP", new HeadRule(new String[][]{{"left", "CC", "WRB", "JJ", "ADJP"}}));
+    headRules.put("WHADVP", new HeadRule(new String[][]{{"right", "CC", "WRB"}}));
+    headRules.put("WHNP", new HeadRule(new String[][]{{"left", "WDT", "WP", "WP$", "WHADJP", "WHPP", "WHNP"}}));
+    headRules.put("WHPP", new HeadRule(new String[][]{{"right", "IN", "TO", "FW"}}));
+    headRules.put("X", new HeadRule(new String[][]{{"right"}})); // crap rule
+    headRules.put("NP", new HeadRule(new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "POS", "JJR"}, {"left", "NP"}, {"rightdis", "$", "ADJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}}));
+    headRules.put("TYPO", new HeadRule(new String[][] {{"left"}})); // another crap rule, for Brown (Roger)
+    headRules.put("EDITED", new HeadRule(new String[][] {{"left"}}));  // crap rule for Switchboard (if don't delete EDITED nodes)
+    headRules.put("XS", new HeadRule(new String[][] {{"right", "IN"}})); // rule for new structure in QP
+  }
+    
+  @Override
+  protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
+    if (headIdx >= 2) {
+      String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
+      if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
+        int newHeadIdx = headIdx - 2;
+        Tree t = daughterTrees[newHeadIdx];
+        while (newHeadIdx >= 0 && t.isPreTerminal() &&
+            tlp.isPunctuationTag(t.value())) {
+          newHeadIdx--;
+        }
+        if (newHeadIdx >= 0) {
+          headIdx = newHeadIdx;
+        }
+      }
+    }
+    return headIdx;
+  }
+
+
+ 
 }
+
