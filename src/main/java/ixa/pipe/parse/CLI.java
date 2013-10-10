@@ -19,6 +19,7 @@ package ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
 import ixa.pipe.heads.CollinsHeadFinder;
+import ixa.pipe.heads.EnglishSemanticHeadFinder;
 import ixa.pipe.heads.HeadFinder;
 
 import java.io.BufferedReader;
@@ -76,7 +77,7 @@ public class CLI {
     parser
         .addArgument("-l", "--lang")
         .choices("en","es")
-        .required(true)
+        .required(false)
         .help(
             "It is REQUIRED to choose a language to perform annotation with ixa-pipe-parse");
 
@@ -102,10 +103,9 @@ public class CLI {
     }
 
     /*
-     * Load language and headFinder parameters
+     * Load headFinder parameters
      */
-
-    String lang = parsedArguments.getString("lang");
+    
     String headFinderOption;
     if (parsedArguments.get("heads") == null) {
       headFinderOption = "";
@@ -113,8 +113,7 @@ public class CLI {
       headFinderOption = parsedArguments.getString("heads");
     }
 
-    // construct kaf Reader and read from standard input
-    Annotate annotator = new Annotate(lang);
+   
     BufferedReader breader = null;
     BufferedWriter bwriter = null;
     
@@ -122,6 +121,19 @@ public class CLI {
       breader = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
       bwriter = new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
       KAFDocument kaf = KAFDocument.createFromStream(breader);
+      
+      // language parameter
+      String lang;
+      if (parsedArguments.get("lang") == null) { 
+      	  lang = kaf.getLang();
+        }
+        else { 
+      	 lang =  parsedArguments.getString("lang");
+        }
+      
+      // construct kaf Reader and read from standard input
+      Annotate annotator = new Annotate(lang);
+      
       kaf.addLinguisticProcessor("constituency", "ixa-pipe-parse-"+lang, "1.0");
       
       // choosing HeadFinder: (Collins rules for English and derivations of it
@@ -137,20 +149,14 @@ public class CLI {
           if (headFinderOption.equalsIgnoreCase("collins")) {
             headFinder = new CollinsHeadFinder();
           } else {
-        	  // headFinder = new SemanticHeadFinder(lang);
-            System.err
-                .println("English Semantic Head Finder not yet available. Using Collins instead.");
-            headFinder = new CollinsHeadFinder();
+        	  headFinder = new EnglishSemanticHeadFinder(true);
           }
         }
         if (lang.equalsIgnoreCase("es")) {
           if (headFinderOption.equalsIgnoreCase("collins")) {
-            //headFinder = new CollinsHeadFinder(lang);
+            //headFinder = new CollinsHeadFinder();
           } else {
-            // headFinder = new SemanticHeadFinder(lang);
-            System.err
-                .println("Spanish Semantic Head Finder not available. Using Collins instead");
-            //headFinder = new CollinsHeadFinder(lang);
+            //headFinder = new EnglishSemanticHeadFinder(true);
           }
         }
 

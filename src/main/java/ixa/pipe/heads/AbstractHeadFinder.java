@@ -269,6 +269,10 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
     }
   }
 
+  protected boolean isPreTerminal(Parse parse) { 
+	  return (parse.getChildCount() == 1 && parse.getChildren()[0].getChildCount() == 0);
+  }
+  
   /**
    * Modifies the input Parse tree annotating the heads with '=H' according to
    * every language specific HeadRules class.
