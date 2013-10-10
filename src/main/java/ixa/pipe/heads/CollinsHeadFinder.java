@@ -19,7 +19,7 @@ package ixa.pipe.heads;
 
 import java.util.HashMap;
 
-import edu.stanford.nlp.trees.Tree;
+import opennlp.tools.parser.Parse;
 
 /**
  * Class for storing the English head rules associated with parsing. The headrules
@@ -74,22 +74,20 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
   }
     
   @Override
-  protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
-    if (headIdx >= 2) {
-      String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
+  protected void postOperationFix(Parse headNode, Parse[] children) { 
+    String prevLab = children[headNode.getHeadIndex() - 1].getType();
       if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
-        int newHeadIdx = headIdx - 2;
-        Tree t = daughterTrees[newHeadIdx];
-        while (newHeadIdx >= 0 && t.isPreTerminal() &&
-            tlp.isPunctuationTag(t.value())) {
+        int newHeadIdx = headNode.getHeadIndex() - 2;
+        Parse parse = children[newHeadIdx];
+        while (newHeadIdx >= 0 && parse.getChildCount() == 1 &&
+            punctSet.contains(parse.getType())) {
           newHeadIdx--;
         }
         if (newHeadIdx >= 0) {
-          headIdx = newHeadIdx;
+          
+          headNode.setType(parse.getType());
         }
       }
-    }
-    return headIdx;
   }
 
 
