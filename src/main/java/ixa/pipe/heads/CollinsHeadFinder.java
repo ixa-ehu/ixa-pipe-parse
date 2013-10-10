@@ -22,15 +22,22 @@ import java.util.HashMap;
 import opennlp.tools.parser.Parse;
 
 /**
- * Class for storing the English head rules associated with parsing. The headrules
- * are specified in $src/main/resources/en-head-rules
+ * Class for storing the English head rules associated with parsing according
+ * to Michael Collins's PhD Thesis (1999: 236-238). 
  *  
- * NOTE: This is the very same class than the one inside opennlp.tools.parser.lang.en. The only
- * change is the return of the getHead() method: 
+ * 2013/10: Originally based on the HeadRules for English of OpenNLP which read 
+ * the rules from a file. We instead harcoded the rules here to code much more 
+ * easily the various traversal methods. This hardcoded is originally based on 
+ * an implementation of the CollinsHeadFinder.java of Stanford CoreNLP, but we still
+ * rely on the Apache OpenNLP API to handle Parse tree traversals and so on. 
  * 
- * Before: return constituents[ci].getHead(); Now: return constituents[ci];
+ * The deployment of these rules in the AbstractHeadFinder.java class is a complete
+ * reimplementation of the opennlp.tools.parser.HeadRules.en.HeadRules.java class. 
  * 
- * Other changes include removal of deprecated methods we do not need to use. 
+ * This reimplementation allows now to coherently traverse the tree to mark the head nodes 
+ * via 6 different methods (see AbstractHeadFinder). 
+ * 
+ * @author ragerri 
  * 
  */
 public class CollinsHeadFinder extends AbstractHeadFinder {
@@ -74,20 +81,9 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
   }
     
   @Override
+  // TODO
   protected void postOperationFix(Parse headNode, Parse[] children) { 
-    String prevLab = children[headNode.getHeadIndex() - 1].getType();
-      if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
-        int newHeadIdx = headNode.getHeadIndex() - 2;
-        Parse parse = children[newHeadIdx];
-        while (newHeadIdx >= 0 && parse.getChildCount() == 1 &&
-            punctSet.contains(parse.getType())) {
-          newHeadIdx--;
-        }
-        if (newHeadIdx >= 0) {
-          
-          headNode.setType(parse.getType());
-        }
-      }
+    
   }
 
 

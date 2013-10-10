@@ -29,20 +29,51 @@ import opennlp.tools.parser.Parse;
 import opennlp.tools.parser.chunking.Parser;
 
 /**
- * Class for storing the English head rules associated with parsing. The
- * headrules are specified in $src/main/resources/en-head-rules
+ *
+ * A base class for a HeadFinder similar to the one described in
+ * Michael Collins' 1999 thesis.  For a given constituent we perform operations
+ * try to search in a parse node children for a constituent which, if it is equal to a 
+ * tag, will be chosen as headWord. with a final default that goes with the direction (leftToRight or 
+ * rightToLeft). 
  * 
- * NOTE: This is the very same class than the one inside
- * opennlp.tools.parser.lang.en. The only change is the return of the getHead()
- * method:
+ * For most constituents, there will be only one category in the list,
+ * the exception being, in Collins' original version, NP, as seen in CollinsHeadFinder.java HeadRule. 
+ * </p>
+ * <p>
+ * It is up to the overriding base class to initialize the map headRules<String,HeadRule> 
+ * from non-terminal constituent type to HeadRule in its constructor.
+ 
+ * Each HeadRule consists of a String[][].  Each String[] is a list of
+ * candidate tags, except for the first entry, which specifies direction of
+ * traversal and must be one of the following:
+ * </p>
+ * <ul>
+ * <li> "left" means search left-to-right by category and then by position
+ * <li> "leftDis" means search left-to-right by position and then by category
+ * <li> "right" means search right-to-left by category and then by position
+ * <li> "rightDis" means search right-to-left by position and then by category
+ * <li> "leftExc" means to take the first thing from the left that isn't in the list
+ * <li> "rightExc" means to take the first thing from the right that isn't on the list
+ * </ul>
+ * <p>
+ * Changes:
+ * </p>
+ * <ul>
+ * <li> 2013/10: Originally this class was partially based in reading the HeadRule from a file 
+ * $src/main/resources/en-head-rules, hard-coding every traversal which was not left or right with heavily 
+ * duplicated and ad-hoc code. The code has been refactored and re-implemented to read now the new 
+ * HeadRule 2d arrays. 
+ * <li> 2013/10: In the getHead() method whenever the return constituents[ci].getHead() appeared it was 
+ * changed to return constituents[ci]. Other changes include removal of deprecated methods we do 
+ * not need to use in this new version. 
+ * </ul>
  * 
- * Before: return constituents[ci].getHead(); Now: return constituents[ci];
- * 
- * Other changes include removal of deprecated methods we do not need to use.
+ * @author ragerri
  * 
  */
 public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
 
+  private static final boolean DEBUG = false;	
   protected Map<String, HeadRule> headRules;
   protected Set<String> punctSet;
 
@@ -95,16 +126,16 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
     punctSet.add(",");
     punctSet.add("``");
     punctSet.add("''");
-    // punctSet.add(":");
+    punctSet.add(":");
 
   }
 
-  public Set<String> getPunctuationTags() {
+  protected Set<String> getPunctuationTags() {
     return punctSet;
   }
 
-  public Parse getHead(Parse[] constituents, String type) {
-    int headChild;
+  protected Parse getHead(Parse[] constituents, String type) {
+    Parse headChild;
     HeadRule hr;
 
     if (constituents[0].getType() == Parser.TOK_NODE) {
@@ -140,51 +171,61 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
         }
       }
     }
-    return constituents[headChild];
+    headChild = constituents[constituents.length -1].getHead();
+    
+    if (punctSet.contains(headChild)) {
+    	if (DEBUG) { 
+    		System.err.println("Punctuation tag " + headChild.getType() + " chosen as headWord. " +
+    				"Default to leftmost candidate ");
+    	}
+    	headChild = constituents[0].getHead();
+    }  
+    postOperationFix(headChild,constituents);
+    return headChild;
   }
 
-  private int leftTraversal(Parse[] constituents, String[] tags) {
+  private Parse leftTraversal(Parse[] constituents, String[] tags) {
     for (int ti = 0; ti < tags.length; ti++) {
       for (int ci = 0; ci < constituents.length; ci++) {
         if (constituents[ci].getType().equals(tags[ti])) {
-          return ci;
+          return constituents[ci];
         }
       }
     }
-    return -1;
+    return constituents[0].getHead();
   }
 
-  private int rightTraversal(Parse[] constituents, String[] tags) {
+  private Parse rightTraversal(Parse[] constituents, String[] tags) {
     for (int ti = 0; ti < tags.length; ti++) {
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         if (constituents[ci].getType().equals(tags[ti])) {
-          return ci;
+          return constituents[ci];
         }
       }
     }
-    return -1;
+    return constituents[constituents.length -1].getHead();
   }
 
-  private int rightDisTraversal(Parse[] constituents, String[] tags) {
+  private Parse rightDisTraversal(Parse[] constituents, String[] tags) {
     for (int ci = constituents.length - 1; ci >= 0; ci--) {
       for (int ti = tags.length - 1; ti >= 0; ti--) {
         if (constituents[ci].getType().equals(tags[ti])) {
-          return ci;
+          return constituents[ci];
         }
       }
     }
-    return -1;
+    return constituents[constituents.length -1].getHead();
   }
   
-  private int leftDisTraversal(Parse[] constituents, String[] tags) {
+  private Parse leftDisTraversal(Parse[] constituents, String[] tags) {
     for (int ci = 0; ci < constituents.length; ci++) {
       for (int ti = 0;  ti < tags.length; ti++) {
         if (constituents[ci].getType().equals(tags[ti])) {
-          return ci;
+          return constituents[ci];
         }
       }
     }
-    return -1;
+    return constituents[0].getHead();
   }
 
 
@@ -269,6 +310,6 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
    * @param daughterTrees The array of daughter trees
    * @return The new headIndex
    */
-  protected void postOperationFix(Parse headNode, Parse[] daughterTrees) {
+  protected void postOperationFix(Parse headNode, Parse[] constituents) {
   }
 }
