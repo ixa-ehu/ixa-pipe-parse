@@ -32,7 +32,6 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
-import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.jdom2.JDOMException;
@@ -41,9 +40,9 @@ import org.jdom2.JDOMException;
  * ixa-pipe-parse: Constituent Parsing: 
  * 
  *  - Using Apache OpenNLP for training and deploying models. 
- *  - Providing extra support for Collins and Semantic Head Finder, 
- *    useful for coreference resolution, for example. 
- *   - Outputs KAF. 
+ *  - Providing extra support for Collins and Stanford Semantic Head Finder, 
+ *    useful for coreference resolution, for example.
+ *  - Outputs KAF and penn treebank formats.  
  *    
  * @author ragerri
  * @version 1.0
@@ -53,7 +52,6 @@ import org.jdom2.JDOMException;
 public class CLI {
 
   /**
-   * 
    * 
    * BufferedReader (from standard input) and BufferedWriter are opened. The
    * module takes KAF and reads the header, and the text elements and uses
@@ -75,13 +73,11 @@ public class CLI {
         "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
             + "developed by IXA NLP Group using on Apache OpenNLP API.\n");
 
-    MutuallyExclusiveGroup excGroup = parser.addMutuallyExclusiveGroup();
-    
-    excGroup.addArgument("-k","--kaf").action(Arguments.storeTrue()).help("Choose KAF format");
-    excGroup.addArgument("-o", "--outputFormat").choices("penn", "oneline")
+    parser.addArgument("-k","--nokaf").action(Arguments.storeFalse()).help("Do not print parse in KAF format, but plain text.");
+    parser.addArgument("-o", "--outputFormat").choices("penn", "oneline")
             .setDefault("oneline")
             .required(false)
-            .help("Choose between Penn style or oneline LISP style tree output");
+            .help("Choose between Penn style or oneline LISP style tree output; this option only works if '--nokaf' is also on.");
 
     parser.addArgument("-g", "--heads").choices("collins", "sem")
             .required(false)
@@ -96,7 +92,6 @@ public class CLI {
         .help(
             "It is REQUIRED to choose a language to perform annotation with ixa-pipe-parse");
     
-   
     /*
      * Parse the command line arguments
      */
@@ -166,22 +161,22 @@ public class CLI {
         }
         // parse with heads
         Annotate annotator = new Annotate(lang, headFinder);
-        if (parsedArguments.getBoolean("kaf") == true) { 
-          bwriter.write(annotator.parseToKAFHeadFinder(kaf));
+        if (parsedArguments.getBoolean("nokaf")) { 
+          bwriter.write(annotator.parseToKAF(kaf));
         }
         else { 
-          bwriter.write(annotator.parseHeadFinder(kaf));
+          bwriter.write(annotator.parse(kaf));
         }
           
       }
         // parse without heads
       else {
         Annotate annotator = new Annotate(lang);
-        if (parsedArguments.getBoolean("kaf") == true) { 
-          bwriter.write(annotator.parseToKAFHeadFinder(kaf));  
+        if (parsedArguments.getBoolean("nokaf")) { 
+          bwriter.write(annotator.parseToKAF(kaf));  
         }
         else { 
-          bwriter.write(annotator.parseHeadFinder(kaf));
+          bwriter.write(annotator.parse(kaf));
         }
         
       }
