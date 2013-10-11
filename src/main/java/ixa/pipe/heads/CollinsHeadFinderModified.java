@@ -61,7 +61,7 @@ import java.util.HashMap;
 **/
 
 
-public class CollinsHeadFinderModified extends CollinsHeadFinder {
+public class CollinsHeadFinderModified extends OpennNLPCollinsHeadFinder {
 	
 
 	  public CollinsHeadFinderModified() {

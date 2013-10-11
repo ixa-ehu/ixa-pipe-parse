@@ -1,337 +1,322 @@
-/*
- * Copyright 2013 Rodrigo Agerri
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
-
 package ixa.pipe.heads;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
-import opennlp.tools.parser.Constituent;
-import opennlp.tools.parser.GapLabeler;
 import opennlp.tools.parser.Parse;
-import opennlp.tools.parser.chunking.Parser;
 
-/**
- *
- * A base class for a HeadFinder similar to the one described in
- * Michael Collins' 1999 thesis.  For a given constituent we perform operations
- * try to search in a parse node children for a constituent which, if it is equal to a 
- * tag, will be chosen as headWord. with a final default that goes with the direction (leftToRight or 
- * rightToLeft). 
- * 
- * For most constituents, there will be only one category in the list,
- * the exception being, in Collins' original version, NP, as seen in CollinsHeadFinder.java HeadRule. 
- * </p>
- * <p>
- * It is up to the overriding base class to initialize the map headRules<String,HeadRule> 
- * from non-terminal constituent type to HeadRule in its constructor.
+public class AbstractHeadFinder implements HeadFinder {
+	
+  private static final boolean DEBUG = true;
+  protected Map<String, String[][]> headRules;
+  
+  
+
+  /** Default direction if no rule is found for category (the head/parent).
+   *  Subclasses can turn it on if they like.
+   *  If they don't it is an error if no rule is defined for a category
+   *  (null is returned).
+   */
+  protected String[] defaultRule; // = null;
+
+  /** These are built automatically from categoriesToAvoid and used in a fairly
+   *  different fashion from defaultRule (above).  These are used for categories
+   *  that do have defined rules but where none of them have matched.  Rather
+   *  than picking the rightmost or leftmost child, we will use these to pick
+   *  the the rightmost or leftmost child which isn't in categoriesToAvoid.
+   */
+  protected String[] defaultLeftRule;
+  protected String[] defaultRightRule;
+
+  /**
+   * A way for subclasses for corpora with explicit head markings
+   * to return the explicitly marked head
+   *
+   * @param t a tree to find the head of
+   * @return the marked head-- null if no marked head
+   */
+  // to be overridden in subclasses for corpora
+  //
+  protected Parse findMarkedHead(Parse t) {
+    return null;
+  }
+
+  /**
+   * Determine which daughter of the current parse tree is the head.
+   *
+   * @param t The parse tree to examine the daughters of.
+   *          If this is a leaf, <code>null</code> is returned
+   * @return The daughter parse tree that is the head of <code>t</code>
+   * @see Tree#percolateHeads(HeadFinder)
+   *      for a routine to call this and spread heads throughout a tree
+   */
+  
+  public Parse determineHead(Parse t) {
+    return determineHead(t, null);
+  }
+  
+  /**
+   * Determine which daughter of the current parse tree is the head.
+   *
+   * @param t The parse tree to examine the daughters of.
+   *          If this is a leaf, <code>null</code> is returned
+   * @param parent The parent of t
+   * @return The daughter parse tree that is the head of <code>t</code>.
+   *   Returns null for leaf nodes.
+   * @see Tree#percolateHeads(HeadFinder)
+   *      for a routine to call this and spread heads throughout a tree
+   */
  
- * Each HeadRule consists of a String[][].  Each String[] is a list of
- * candidate tags, except for the first entry, which specifies direction of
- * traversal and must be one of the following:
- * </p>
- * <ul>
- * <li> "left" means search left-to-right by category and then by position
- * <li> "leftDis" means search left-to-right by position and then by category
- * <li> "right" means search right-to-left by category and then by position
- * <li> "rightDis" means search right-to-left by position and then by category
- * <li> "leftExc" means to take the first thing from the left that isn't in the list
- * <li> "rightExc" means to take the first thing from the right that isn't on the list
- * </ul>
- * <p>
- * Changes:
- * </p>
- * <ul>
- * <li> 2013/10: Originally this class was partially based in reading the HeadRule from a file 
- * $src/main/resources/en-head-rules, hard-coding every traversal which was not left or right with heavily 
- * duplicated and ad-hoc code. The code has been refactored and re-implemented to read now the new 
- * HeadRule 2d arrays. 
- * <li> 2013/10: In the getHead() method whenever the return constituents[ci].getHead() appeared it was 
- * changed to return constituents[ci]. Other changes include removal of deprecated methods we do 
- * not need to use in this new version. 
- * </ul>
- * 
- * @author ragerri
- * 
- */
-public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
-
-  private static final boolean DEBUG = false;	
-  protected Map<String, HeadRule> headRules;
-  protected Set<String> punctSet;
-
-  protected static class HeadRule {
-
-    protected boolean leftToRight;
-    protected Set<String> how;
-    public String[][] howTags;
-
-    public HeadRule(String[][] howTags) {
-
-      for (String[] tags : howTags) {
-        for (String tag : tags) {
-          if (tag == null)
-            throw new IllegalArgumentException(
-                "tags must not contain null values!");
-        }
-      }
-      this.howTags = howTags;
+  public Parse determineHead(Parse t, Parse parent) {
+    if (headRules == null) {
+      throw new IllegalStateException("Classes derived from AbstractCollinsHeadFinder must create and fill HashMap nonTerminalInfo.");
+    }
+    if (t == null || t.getChildCount() == 0) {
+      throw new IllegalArgumentException("Can't return head of null or leaf Tree.");
+    }
+    if (DEBUG) {
+      System.err.println("determineHead for " + t.getType());
     }
 
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == this) {
-        return true;
-      } else if (obj instanceof HeadRule) {
-        HeadRule rule = (HeadRule) obj;
+    Parse[] kids = t.getChildren();
 
-        return (rule.leftToRight == leftToRight)
-            && Arrays.equals(rule.howTags, howTags);
+    Parse theHead;
+    // first check if subclass found explicitly marked head
+    if ((theHead = findMarkedHead(t)) != null) {
+      if (DEBUG) {
+        System.err.println("Find marked head method returned " +
+                           theHead.getType() + " as head of " + t.getType());
+      }
+      return theHead;
+    }
+
+    // if the node is a unary, then that kid must be the head
+    // it used to special case preterminal and ROOT/TOP case
+    // but that seemed bad (especially hardcoding string "ROOT")
+    if (kids.length == 1) {
+      if (DEBUG) {
+        System.err.println("Only one child determines " +
+                           kids[0].getLabel() + " as head of " + t.getType());
+      }
+      return kids[0];
+    }
+
+    return determineNonTrivialHead(t, parent);
+  }
+  
+  /** Called by determineHead and may be overridden in subclasses
+   *  if special treatment is necessary for particular categories.
+   *
+   *  @param t The tre to determine the head daughter of
+   *  @param parent The parent of t (or may be null)
+   *  @return The head daughter of t
+   */
+  protected Parse determineNonTrivialHead(Parse t, Parse parent) {
+    Parse theHead = null;
+    String motherCat = t.getType();
+    if (DEBUG) {
+      System.err.println("Looking for head of " + t.getType() +
+                         "; value is |" + t.getType() + "|, " +
+                         " baseCat is |" + motherCat + '|');
+    }
+    String[][] how = headRules.get(motherCat);
+    Parse[] kids = t.getChildren();
+    if (how == null) {
+      if (DEBUG) {
+        System.err.println("Warning: No rule found for " + motherCat +
+                           " (first char: " + motherCat.charAt(0) + ')');
+        System.err.println("Known nonterms are: " + headRules.keySet());
+      }
+      if (defaultRule != null) {
+        if (DEBUG) {
+          System.err.println("  Using defaultRule");
+        }
+        return traverseLocate(kids, defaultRule, true);
       } else {
-        return false;
+        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + t);
       }
     }
-  }
-
-  /**
-   * Creates a new set of head rules based on the specified reader.
-   * 
-   * @param rulesReader
-   *          the head rules reader.
-   * 
-   * @throws IOException
-   *           if the head rules reader can not be read.
-   */
-  public AbstractHeadFinder() {
-
-    punctSet = new HashSet<String>();
-    punctSet.add(".");
-    punctSet.add(",");
-    punctSet.add("``");
-    punctSet.add("''");
-    punctSet.add(":");
-
-  }
-
-  protected Set<String> getPunctuationTags() {
-    return punctSet;
-  }
-
-  protected Parse getHead(Parse[] constituents, String type) {
-    HeadRule hr;
-
-    if (constituents[0].getType() == Parser.TOK_NODE) {
-      return null;
-    }
-    // check that our rules match the non-terminals we obtain 
-    // in the parse
-    if ((hr = headRules.get(type)) != null) {
-      
-      //iterate over the headRule 2 dimensional String[][] 
-      for (int i = 0; i < hr.howTags.length; i++) {
-        // for every nonTerminal the first elem is the traversal method 
-        // and the rest the tags 
-        String[] tags = hr.howTags[i];
-
-        if (tags[0].equals("left")) {
-          for (int ci = 0; ci < constituents.length; ci++) {
-            for (int ti = 0;  ti < tags.length; ti++) {
-              if (constituents[ci].getType().equals(tags[ti])) {
-                return constituents[ci];
-              }
-            }
-          }
-          return constituents[constituents.length -1].getHead();
-        }
-
-        else if (tags[0].equals("right")) {
-          for (int ti = 0; ti < tags.length; ti++) {
-            for (int ci = constituents.length - 1; ci >= 0; ci--) {
-              if (constituents[ci].getType().equals(tags[ti])) {
-                return constituents[ci];
-              }
-            }
-          }
-          constituents[constituents.length -1].getHead();
-        }
-
-        else if (tags[0].equals("rightdis")) {
-          for (int ci = constituents.length - 1; ci >= 0; ci--) {
-            for (int ti = tags.length - 1; ti >= 0; ti--) {
-              if (constituents[ci].getType().equals(tags[ti])) {
-                return constituents[ci];
-              }
-            }
-          }
-          return constituents[constituents.length -1].getHead();
-        }
-        else if (tags[0].equals("leftdis")) {
-          for (int ci = 0; ci < constituents.length; ci++) {
-            for (int ti = 0;  ti < tags.length; ti++) {
-              if (constituents[ci].getType().equals(tags[ti])) {
-                return constituents[ci];
-              }
-            }
-          }
-          return constituents[constituents.length -1].getHead();
-        }
-
-        else {
-          for (int ti = 0; ti < tags.length; ti++) {
-            for (int ci = constituents.length - 1; ci >= 0; ci--) {
-              if (constituents[ci].getType().equals(tags[ti])) {
-                return constituents[ci];
-              }
-            }
-          }
-          return constituents[constituents.length - 1].getHead();
-        }
+    for (int i = 0; i < how.length; i++) {
+      boolean lastResort = (i == how.length - 1);
+      theHead = traverseLocate(kids, how[i], lastResort);
+      if (theHead != null) {
+        break;
       }
     }
-    postOperationFix(constituents[constituents.length -1],constituents);
-    return constituents[constituents.length -1].getHead();  
-    
-  }
-
-  private Parse leftTraversal(Parse[] constituents, String[] tags) {
-    for (int ti = 0; ti < tags.length; ti++) {
-      for (int ci = 0; ci < constituents.length; ci++) {
-        if (constituents[ci].getType().equals(tags[ti])) {
-          return constituents[ci];
-        }
-      }
+    if (DEBUG) {
+      System.err.println("  Chose " + theHead.getType());
     }
-    return constituents[0].getHead();
-  }
-
-  private Parse rightTraversal(Parse[] constituents, String[] tags) {
-    for (int ti = 0; ti < tags.length; ti++) {
-      for (int ci = constituents.length - 1; ci >= 0; ci--) {
-        if (constituents[ci].getType().equals(tags[ti])) {
-          return constituents[ci];
-        }
-      }
-    }
-    return constituents[constituents.length -1].getHead();
-  }
-
-  private Parse rightDisTraversal(Parse[] constituents, String[] tags) {
-    for (int ci = constituents.length - 1; ci >= 0; ci--) {
-      for (int ti = tags.length - 1; ti >= 0; ti--) {
-        if (constituents[ci].getType().equals(tags[ti])) {
-          return constituents[ci];
-        }
-      }
-    }
-    return constituents[constituents.length -1].getHead();
+    return theHead;
   }
   
-  private Parse leftDisTraversal(Parse[] constituents, String[] tags) {
-    for (int ci = 0; ci < constituents.length; ci++) {
-      for (int ti = 0;  ti < tags.length; ti++) {
-        if (constituents[ci].getType().equals(tags[ti])) {
-          return constituents[ci];
-        }
-      }
-    }
-    return constituents[constituents.length -1].getHead();
-  }
-
-
-  public void labelGaps(Stack<Constituent> stack) {
-    if (stack.size() > 4) {
-      // Constituent con0 = (Constituent) stack.get(stack.size()-1);
-      Constituent con1 = stack.get(stack.size() - 2);
-      Constituent con2 = stack.get(stack.size() - 3);
-      Constituent con3 = stack.get(stack.size() - 4);
-      Constituent con4 = stack.get(stack.size() - 5);
-      // System.err.println("con0="+con0.label+" con1="+con1.label+" con2="+con2.label+" con3="+con3.label+" con4="+con4.label);
-      // subject extraction
-      if (con1.getLabel().equals("NP") && con2.getLabel().equals("S")
-          && con3.getLabel().equals("SBAR")) {
-        con1.setLabel(con1.getLabel() + "-G");
-        con2.setLabel(con2.getLabel() + "-G");
-        con3.setLabel(con3.getLabel() + "-G");
-      }
-      // object extraction
-      else if (con1.getLabel().equals("NP") && con2.getLabel().equals("VP")
-          && con3.getLabel().equals("S") && con4.getLabel().equals("SBAR")) {
-        con1.setLabel(con1.getLabel() + "-G");
-        con2.setLabel(con2.getLabel() + "-G");
-        con3.setLabel(con3.getLabel() + "-G");
-        con4.setLabel(con4.getLabel() + "-G");
-      }
-    }
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    } else if (obj instanceof AbstractHeadFinder) {
-      AbstractHeadFinder rules = (AbstractHeadFinder) obj;
-
-      return rules.headRules.equals(headRules)
-          && rules.punctSet.equals(punctSet);
+  /**
+   * Attempt to locate head daughter tree from among daughters.
+   * Go through daughterTrees looking for things from or not in a set given by
+   * the contents of the array how, and if
+   * you do not find one, take leftmost or rightmost perhaps matching thing iff
+   * lastResort is true, otherwise return <code>null</code>.
+   */
+  protected Parse traverseLocate(Parse[] daughterTrees, String[] how, boolean lastResort) {
+    int headIdx;
+    if (how[0].equals("left")) {
+      headIdx = findLeftHead(daughterTrees, how);
+    } else if (how[0].equals("leftdis")) {
+      headIdx = findLeftDisHead(daughterTrees, how);
+    } else if (how[0].equals("leftexcept")) {
+      headIdx = findLeftExceptHead(daughterTrees, how);
+    } else if (how[0].equals("right")) {
+      headIdx = findRightHead(daughterTrees, how);
+    } else if (how[0].equals("rightdis")) {
+      headIdx = findRightDisHead(daughterTrees, how);
+    } else if (how[0].equals("rightexcept")) {
+      headIdx = findRightExceptHead(daughterTrees, how);
     } else {
-      return false;
+      throw new IllegalStateException("ERROR: invalid direction type " + how[0] + " to nonTerminalInfo map in AbstractCollinsHeadFinder.");
     }
+
+    // what happens if our rule didn't match anything
+    if (headIdx < 0) {
+      if (lastResort) {
+        // use the default rule to try to match anything except categoriesToAvoid
+        // if that doesn't match, we'll return the left or rightmost child (by
+        // setting headIdx).  We want to be careful to ensure that postOperationFix
+        // runs exactly once.
+        String[] rule;
+        if (how[0].startsWith("left")) {
+          headIdx = 0;
+          rule = defaultLeftRule;
+        } else {
+          headIdx = daughterTrees.length - 1;
+          rule = defaultRightRule;
+        }
+        Parse child = traverseLocate(daughterTrees, rule, false);
+        if (child != null) {
+          return child;
+        } else {
+          return daughterTrees[headIdx];
+        }
+      } else {
+        // if we're not the last resort, we can return null to let the next rule try to match
+        return null;
+      }
+    }
+
+    headIdx = postOperationFix(headIdx, daughterTrees);
+
+    return daughterTrees[headIdx];
   }
 
-  protected boolean isPreTerminal(Parse parse) { 
-	  return (parse.getChildCount() == 1 && parse.getChildren()[0].getChildCount() == 0);
-  }
-  
-  /**
-   * Modifies the input Parse tree annotating the heads with '=H' according to
-   * every language specific HeadRules class.
-   * 
-   * 
-   * 
-   * @param parse
-   */
-  public void printHeads(Parse parse) {
-    LinkedList<Parse> nodes = new LinkedList<Parse>();
-    nodes.add(parse);
-    // This is a recursive iteration over the whole parse tree
-    while (!nodes.isEmpty()) {
-      Parse currentNode = nodes.removeFirst();
-      // When a node is here its '=H' annotation has already happened
-      // so it '=H' has to be removed to match with the head rules
-      String type = currentNode.getType().replace("=H", "");
-      Parse[] children = currentNode.getChildren();
-      Parse headChild = null;
-      if (children.length > 0) {
-        headChild = getHead(children, type);
-      }
-      // For every child, if it is the head, annotate with '=H'
-      // and also add to the queue for the recursive processing
-      for (Parse child : currentNode.getChildren()) {
-        if (child == headChild) {
-          child.setType(child.getType() + "=H");
+  private int findLeftHead(Parse[] daughterTrees, String[] how) {
+    for (int i = 1; i < how.length; i++) {
+      for (int headIdx = 0; headIdx < daughterTrees.length; headIdx++) {
+        String childCat = daughterTrees[headIdx].getType();
+        if (how[i].equals(childCat)) {
+          return headIdx;
         }
-        nodes.addLast(child);
       }
     }
+    return -1;
   }
-  
+
+  private int findLeftDisHead(Parse[] daughterTrees, String[] how) {
+    for (int headIdx = 0; headIdx < daughterTrees.length; headIdx++) {
+      String childCat = daughterTrees[headIdx].getType();
+      for (int i = 1; i < how.length; i++) {
+        if (how[i].equals(childCat)) {
+          return headIdx;
+        }
+      }
+    }
+    return -1;
+  }
+
+  private int findLeftExceptHead(Parse[] daughterTrees, String[] how) {
+    for (int headIdx = 0; headIdx < daughterTrees.length; headIdx++) {
+      String childCat = daughterTrees[headIdx].getType();
+      boolean found = true;
+      for (int i = 1; i < how.length; i++) {
+        if (how[i].equals(childCat)) {
+          found = false;
+        }
+      }
+      if (found) {
+        return headIdx;
+      }
+    }
+    return -1;
+  }
+
+  private int findRightHead(Parse[] daughterTrees, String[] how) {
+    for (int i = 1; i < how.length; i++) {
+      for (int headIdx = daughterTrees.length - 1; headIdx >= 0; headIdx--) {
+        String childCat = daughterTrees[headIdx].getType();
+        if (how[i].equals(childCat)) {
+          return headIdx;
+        }
+      }
+    }
+    return -1;
+  }
+
+  // from right, but search for any of the categories, not by category in turn
+  private int findRightDisHead(Parse[] daughterTrees, String[] how) {
+    for (int headIdx = daughterTrees.length - 1; headIdx >= 0; headIdx--) {
+      String childCat = daughterTrees[headIdx].getType();
+      for (int i = 1; i < how.length; i++) {
+        if (how[i].equals(childCat)) {
+          return headIdx;
+        }
+      }
+    }
+    return -1;
+  }
+
+  private int findRightExceptHead(Parse[] daughterTrees, String[] how) {
+    for (int headIdx = daughterTrees.length - 1; headIdx >= 0; headIdx--) {
+      String childCat = daughterTrees[headIdx].getType();
+      boolean found = true;
+      for (int i = 1; i < how.length; i++) {
+        if (how[i].equals(childCat)) {
+          found = false;
+        }
+      }
+      if (found) {
+        return headIdx;
+      }
+    }
+    return -1;
+  }
+
+  public void printHeads(Parse parse) {
+	  LinkedList<Parse> nodes = new LinkedList<Parse>();
+	    nodes.add(parse);
+	    // This is a recursive iteration over the whole parse tree
+	    while (!nodes.isEmpty()) {
+	      Parse currentNode = nodes.removeFirst();
+	      // When a node is here its '=H' annotation has already happened
+	      // so it '=H' has to be removed to match with the head rules
+	      Parse headChild = null;
+	      // For every child, if it is the head, annotate with '=H'
+	      // and also add to the queue for the recursive processing
+	      Parse[] children = currentNode.getChildren();
+	      for (int i = 0; i < children.length; i++) {
+	        if (children[i].getChildCount() > 1) {
+	    	  headChild = determineHead(children[i]);
+	    	  if (DEBUG) { 
+	    		  System.err.println("headChild of " + children[i].getType() + " is " + headChild.getType());  
+	    	  }
+	    	  
+	        if (children[i].getChildren()[children[i].indexOf(headChild)] != null) {
+	          children[children[i].indexOf(headChild)].setType(headChild.getType() + "=H");
+	        }
+	        nodes.addLast(children[i]);
+	      }
+	      
+	      }
+	    }
+	}
+
+
   /**
    * A way for subclasses to fix any heads under special conditions.
    * The default does nothing.
@@ -340,6 +325,7 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
    * @param daughterTrees The array of daughter trees
    * @return The new headIndex
    */
-  protected void postOperationFix(Parse headNode, Parse[] constituents) {
+  protected int postOperationFix(int headIdx, Parse[] daughterTrees) {
+    return headIdx;
   }
 }
