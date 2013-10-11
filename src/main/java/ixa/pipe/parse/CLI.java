@@ -29,8 +29,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import org.jdom2.JDOMException;
@@ -71,8 +73,21 @@ public class CLI {
     ArgumentParser parser = ArgumentParsers.newArgumentParser(
         "ixa-pipe-parse-1.0.jar").description(
         "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
-            + "developed by IXA NLP Group based on Apache OpenNLP API.\n");
+            + "developed by IXA NLP Group using on Apache OpenNLP API.\n");
 
+    MutuallyExclusiveGroup excGroup = parser.addMutuallyExclusiveGroup();
+    
+    excGroup.addArgument("-k","--kaf").action(Arguments.storeTrue()).help("Choose KAF format");
+    excGroup.addArgument("-o", "--outputFormat").choices("penn", "oneline")
+            .setDefault("oneline")
+            .required(false)
+            .help("Choose between Penn style or oneline LISP style tree output");
+
+    parser.addArgument("-g", "--heads").choices("collins", "sem")
+            .required(false)
+            .help("Choose between Collins-based or Stanford Semantic HeadFinder");
+    
+    
     // specify language
     parser
         .addArgument("-l", "--lang")
@@ -80,14 +95,8 @@ public class CLI {
         .required(false)
         .help(
             "It is REQUIRED to choose a language to perform annotation with ixa-pipe-parse");
-
-    parser
-        .addArgument("-g", "--heads")
-        .choices("collins", "sem")
-        .required(false)
-        .help(
-            "It is REQUIRED to choose a language to perform annotation with ixa-pipe-parse");
-
+    
+   
     /*
      * Parse the command line arguments
      */
@@ -113,7 +122,6 @@ public class CLI {
       headFinderOption = parsedArguments.getString("heads");
     }
 
-   
     BufferedReader breader = null;
     BufferedWriter bwriter = null;
     
@@ -132,14 +140,11 @@ public class CLI {
         }
       
       // construct kaf Reader and read from standard input
-      Annotate annotator = new Annotate(lang);
       
       kaf.addLinguisticProcessor("constituency", "ixa-pipe-parse-"+lang, "1.0");
       
-      // choosing HeadFinder: (Collins rules for English and derivations of it
-      // for other languages; sem (Semantic headFinder re-implemented from
-      // Stanford CoreNLP).
-      // Default: sem (semantic head finder).
+     // choosing HeadFinder: (Collins rules; sem Semantic headFinder re-implemented from
+      // Stanford CoreNLP. Default: sem (semantic head finder).
 
       HeadFinder headFinder = null;
 
@@ -159,13 +164,26 @@ public class CLI {
             //headFinder = new EnglishSemanticHeadFinder(true);
           }
         }
-
         // parse with heads
-        bwriter.write(annotator.getConstituentParseWithHeads(kaf, headFinder));
+        Annotate annotator = new Annotate(lang, headFinder);
+        if (parsedArguments.getBoolean("kaf") == true) { 
+          bwriter.write(annotator.parseToKAFHeadFinder(kaf));
+        }
+        else { 
+          bwriter.write(annotator.parseHeadFinder(kaf));
+        }
+          
       }
         // parse without heads
       else {
-        bwriter.write(annotator.getConstituentParse(kaf));
+        Annotate annotator = new Annotate(lang);
+        if (parsedArguments.getBoolean("kaf") == true) { 
+          bwriter.write(annotator.parseToKAFHeadFinder(kaf));  
+        }
+        else { 
+          bwriter.write(annotator.parseHeadFinder(kaf));
+        }
+        
       }
 
       bwriter.close();

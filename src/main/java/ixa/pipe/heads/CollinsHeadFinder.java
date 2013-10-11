@@ -51,13 +51,12 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
     headRules.put("ADJP", new HeadRule(new String[][]{{"left", "NNS", "QP", "NN", "$", "ADVP", "JJ", "VBN", "VBG", "ADJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}} ));
     headRules.put("ADVP", new HeadRule(new String[][]{{"right", "RB", "RBR", "RBS", "FW", "ADVP", "TO", "CD", "JJR", "JJ", "IN", "NP", "JJS", "NN"}}));
     headRules.put("CONJP", new HeadRule(new String[][]{{"right", "CC", "RB", "IN"}}));
-    headRules.put("FRAG", new HeadRule(new String[][]{{"right"}})); // crap
+    headRules.put("FRAG", new HeadRule(new String[][]{{"right"}}));
     headRules.put("INTJ", new HeadRule(new String[][]{{"left"}}));
     headRules.put("LST", new HeadRule(new String[][]{{"right", "LS", ":"}}));
     headRules.put("NAC", new HeadRule(new String[][]{{"left", "NN", "NNS", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "FW"}}));
-    headRules.put("NX", new HeadRule(new String[][]{{"left"}})); // crap
+    headRules.put("NX", new HeadRule(new String[][]{{"left"}})); 
     headRules.put("PP", new HeadRule(new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW"}}));
-    // should prefer JJ? (PP (JJ such) (IN as) (NP (NN crocidolite)))
     headRules.put("PRN", new HeadRule(new String[][]{{"left"}}));
     headRules.put("PRT", new HeadRule(new String[][]{{"right", "RP"}}));
     headRules.put("QP", new HeadRule(new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "RB", "DT", "CD", "NCD", "QP", "JJR", "JJS"}}));
@@ -75,9 +74,9 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
     headRules.put("WHPP", new HeadRule(new String[][]{{"right", "IN", "TO", "FW"}}));
     headRules.put("X", new HeadRule(new String[][]{{"right"}})); // crap rule
     headRules.put("NP", new HeadRule(new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "POS", "JJR"}, {"left", "NP"}, {"rightdis", "$", "ADJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}}));
-    headRules.put("TYPO", new HeadRule(new String[][] {{"left"}})); // another crap rule, for Brown (Roger)
-    headRules.put("EDITED", new HeadRule(new String[][] {{"left"}}));  // crap rule for Switchboard (if don't delete EDITED nodes)
-    headRules.put("XS", new HeadRule(new String[][] {{"right", "IN"}})); // rule for new structure in QP
+    headRules.put("TYPO", new HeadRule(new String[][] {{"left"}}));
+    headRules.put("EDITED", new HeadRule(new String[][] {{"left"}}));
+    headRules.put("XS", new HeadRule(new String[][] {{"right", "IN"}}));
   }
     
   @Override

@@ -135,7 +135,6 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
   }
 
   protected Parse getHead(Parse[] constituents, String type) {
-    Parse headChild;
     HeadRule hr;
 
     if (constituents[0].getType() == Parser.TOK_NODE) {
@@ -144,6 +143,7 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
     // check that our rules match the non-terminals we obtain 
     // in the parse
     if ((hr = headRules.get(type)) != null) {
+      
       //iterate over the headRule 2 dimensional String[][] 
       for (int i = 0; i < hr.howTags.length; i++) {
         // for every nonTerminal the first elem is the traversal method 
@@ -151,37 +151,63 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
         String[] tags = hr.howTags[i];
 
         if (tags[0].equals("left")) {
-          headChild = leftTraversal(constituents, tags);
+          for (int ci = 0; ci < constituents.length; ci++) {
+            for (int ti = 0;  ti < tags.length; ti++) {
+              if (constituents[ci].getType().equals(tags[ti])) {
+                return constituents[ci];
+              }
+            }
+          }
+          return constituents[constituents.length -1].getHead();
         }
 
         else if (tags[0].equals("right")) {
-          headChild = rightTraversal(constituents, tags);
+          for (int ti = 0; ti < tags.length; ti++) {
+            for (int ci = constituents.length - 1; ci >= 0; ci--) {
+              if (constituents[ci].getType().equals(tags[ti])) {
+                return constituents[ci];
+              }
+            }
+          }
+          constituents[constituents.length -1].getHead();
         }
 
         else if (tags[0].equals("rightdis")) {
-          headChild = rightDisTraversal(constituents, tags);
+          for (int ci = constituents.length - 1; ci >= 0; ci--) {
+            for (int ti = tags.length - 1; ti >= 0; ti--) {
+              if (constituents[ci].getType().equals(tags[ti])) {
+                return constituents[ci];
+              }
+            }
+          }
+          return constituents[constituents.length -1].getHead();
         }
-        else if (tags[0].equals("leftdis")) { 
-          headChild = leftDisTraversal(constituents, tags);
+        else if (tags[0].equals("leftdis")) {
+          for (int ci = 0; ci < constituents.length; ci++) {
+            for (int ti = 0;  ti < tags.length; ti++) {
+              if (constituents[ci].getType().equals(tags[ti])) {
+                return constituents[ci];
+              }
+            }
+          }
+          return constituents[constituents.length -1].getHead();
         }
 
         else {
-          throw new IllegalStateException(
-              "ERROR: invalid direction type to headRules map in AbstractHeadFinder.");
+          for (int ti = 0; ti < tags.length; ti++) {
+            for (int ci = constituents.length - 1; ci >= 0; ci--) {
+              if (constituents[ci].getType().equals(tags[ti])) {
+                return constituents[ci];
+              }
+            }
+          }
+          return constituents[constituents.length - 1].getHead();
         }
       }
     }
-    headChild = constituents[constituents.length -1].getHead();
+    postOperationFix(constituents[constituents.length -1],constituents);
+    return constituents[constituents.length -1].getHead();  
     
-    if (punctSet.contains(headChild)) {
-    	if (DEBUG) { 
-    		System.err.println("Punctuation tag " + headChild.getType() + " chosen as headWord. " +
-    				"Default to leftmost candidate ");
-    	}
-    	headChild = constituents[0].getHead();
-    }  
-    postOperationFix(headChild,constituents);
-    return headChild;
   }
 
   private Parse leftTraversal(Parse[] constituents, String[] tags) {
@@ -225,7 +251,7 @@ public abstract class AbstractHeadFinder implements HeadFinder, GapLabeler {
         }
       }
     }
-    return constituents[0].getHead();
+    return constituents[constituents.length -1].getHead();
   }
 
 
