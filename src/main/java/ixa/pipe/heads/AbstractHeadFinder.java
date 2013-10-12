@@ -1,38 +1,42 @@
 package ixa.pipe.heads;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import opennlp.tools.parser.Parse;
 
 public class AbstractHeadFinder implements HeadFinder {
-	
+
   private static final boolean DEBUG = true;
   protected Map<String, String[][]> headRules;
-  
-  
+  protected Set<String> preTerminals = new HashSet<String>(Arrays.asList("PRP")); 
 
-  /** Default direction if no rule is found for category (the head/parent).
-   *  Subclasses can turn it on if they like.
-   *  If they don't it is an error if no rule is defined for a category
-   *  (null is returned).
+  /**
+   * Default direction if no rule is found for category (the head/parent).
+   * Subclasses can turn it on if they like. If they don't it is an error if no
+   * rule is defined for a category (null is returned).
    */
   protected String[] defaultRule; // = null;
 
-  /** These are built automatically from categoriesToAvoid and used in a fairly
-   *  different fashion from defaultRule (above).  These are used for categories
-   *  that do have defined rules but where none of them have matched.  Rather
-   *  than picking the rightmost or leftmost child, we will use these to pick
-   *  the the rightmost or leftmost child which isn't in categoriesToAvoid.
+  /**
+   * These are built automatically from categoriesToAvoid and used in a fairly
+   * different fashion from defaultRule (above). These are used for categories
+   * that do have defined rules but where none of them have matched. Rather than
+   * picking the rightmost or leftmost child, we will use these to pick the the
+   * rightmost or leftmost child which isn't in categoriesToAvoid.
    */
   protected String[] defaultLeftRule;
   protected String[] defaultRightRule;
 
   /**
-   * A way for subclasses for corpora with explicit head markings
-   * to return the explicitly marked head
-   *
-   * @param t a tree to find the head of
+   * A way for subclasses for corpora with explicit head markings to return the
+   * explicitly marked head
+   * 
+   * @param t
+   *          a tree to find the head of
    * @return the marked head-- null if no marked head
    */
   // to be overridden in subclasses for corpora
@@ -43,36 +47,41 @@ public class AbstractHeadFinder implements HeadFinder {
 
   /**
    * Determine which daughter of the current parse tree is the head.
-   *
-   * @param t The parse tree to examine the daughters of.
-   *          If this is a leaf, <code>null</code> is returned
+   * 
+   * @param t
+   *          The parse tree to examine the daughters of. If this is a leaf,
+   *          <code>null</code> is returned
    * @return The daughter parse tree that is the head of <code>t</code>
-   * @see Tree#percolateHeads(HeadFinder)
-   *      for a routine to call this and spread heads throughout a tree
+   * @see Tree#percolateHeads(HeadFinder) for a routine to call this and spread
+   *      heads throughout a tree
    */
-  
+
   public Parse determineHead(Parse t) {
     return determineHead(t, null);
   }
-  
+
   /**
    * Determine which daughter of the current parse tree is the head.
-   *
-   * @param t The parse tree to examine the daughters of.
-   *          If this is a leaf, <code>null</code> is returned
-   * @param parent The parent of t
-   * @return The daughter parse tree that is the head of <code>t</code>.
-   *   Returns null for leaf nodes.
-   * @see Tree#percolateHeads(HeadFinder)
-   *      for a routine to call this and spread heads throughout a tree
+   * 
+   * @param t
+   *          The parse tree to examine the daughters of. If this is a leaf,
+   *          <code>null</code> is returned
+   * @param parent
+   *          The parent of t
+   * @return The daughter parse tree that is the head of <code>t</code>. Returns
+   *         null for leaf nodes.
+   * @see Tree#percolateHeads(HeadFinder) for a routine to call this and spread
+   *      heads throughout a tree
    */
- 
+
   public Parse determineHead(Parse t, Parse parent) {
     if (headRules == null) {
-      throw new IllegalStateException("Classes derived from AbstractCollinsHeadFinder must create and fill HashMap nonTerminalInfo.");
+      throw new IllegalStateException(
+          "Classes derived from AbstractCollinsHeadFinder must create and fill HashMap nonTerminalInfo.");
     }
     if (t == null || t.getChildCount() == 0) {
-      throw new IllegalArgumentException("Can't return head of null or leaf Tree.");
+      throw new IllegalArgumentException(
+          "Can't return head of null or leaf Tree.");
     }
     if (DEBUG) {
       System.err.println("determineHead for " + t.getType());
@@ -84,8 +93,8 @@ public class AbstractHeadFinder implements HeadFinder {
     // first check if subclass found explicitly marked head
     if ((theHead = findMarkedHead(t)) != null) {
       if (DEBUG) {
-        System.err.println("Find marked head method returned " +
-                           theHead.getType() + " as head of " + t.getType());
+        System.err.println("Find marked head method returned "
+            + theHead.getType() + " as head of " + t.getType());
       }
       return theHead;
     }
@@ -95,45 +104,48 @@ public class AbstractHeadFinder implements HeadFinder {
     // but that seemed bad (especially hardcoding string "ROOT")
     if (kids.length == 1) {
       if (DEBUG) {
-        System.err.println("Only one child determines " +
-                           kids[0].getLabel() + " as head of " + t.getType());
+        System.err.println("Only one child determines " + kids[0].getLabel()
+            + " as head of " + t.getType());
       }
       return kids[0];
     }
 
     return determineNonTrivialHead(t, parent);
   }
-  
-  /** Called by determineHead and may be overridden in subclasses
-   *  if special treatment is necessary for particular categories.
-   *
-   *  @param t The tre to determine the head daughter of
-   *  @param parent The parent of t (or may be null)
-   *  @return The head daughter of t
+
+  /**
+   * Called by determineHead and may be overridden in subclasses if special
+   * treatment is necessary for particular categories.
+   * 
+   * @param t
+   *          The tre to determine the head daughter of
+   * @param parent
+   *          The parent of t (or may be null)
+   * @return The head daughter of t
    */
   protected Parse determineNonTrivialHead(Parse t, Parse parent) {
     Parse theHead = null;
-    String motherCat = t.getType();
+    String motherCat = t.getType().replace("=H", "");
     if (DEBUG) {
-      System.err.println("Looking for head of " + t.getType() +
-                         "; value is |" + t.getType() + "|, " +
-                         " baseCat is |" + motherCat + '|');
+      System.err.println("Looking for head of " + t.getType() + "; value is |"
+          + t.getType() + "|, " + " baseCat is |" + motherCat + '|');
     }
     String[][] how = headRules.get(motherCat);
     Parse[] kids = t.getChildren();
     if (how == null) {
       if (DEBUG) {
-        System.err.println("Warning: No rule found for " + motherCat +
-                           " (first char: " + motherCat.charAt(0) + ')');
+        System.err.println("Warning: No rule found for " + motherCat
+            + " (first char: " + motherCat.charAt(0) + ')');
         System.err.println("Known nonterms are: " + headRules.keySet());
       }
       if (defaultRule != null) {
         if (DEBUG) {
-          System.err.println("  Using defaultRule");
+          System.err.println(" Using defaultRule");
         }
         return traverseLocate(kids, defaultRule, true);
       } else {
-        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + t);
+        throw new IllegalArgumentException("No head rule defined for "
+            + motherCat + " using " + this.getClass() + " in " + t);
       }
     }
     for (int i = 0; i < how.length; i++) {
@@ -144,19 +156,20 @@ public class AbstractHeadFinder implements HeadFinder {
       }
     }
     if (DEBUG) {
-      System.err.println("  Chose " + theHead.getType());
+      System.err.println(" Chose " + theHead.getType());
     }
     return theHead;
   }
-  
+
   /**
-   * Attempt to locate head daughter tree from among daughters.
-   * Go through daughterTrees looking for things from or not in a set given by
-   * the contents of the array how, and if
-   * you do not find one, take leftmost or rightmost perhaps matching thing iff
-   * lastResort is true, otherwise return <code>null</code>.
+   * Attempt to locate head daughter tree from among daughters. Go through
+   * daughterTrees looking for things from or not in a set given by the contents
+   * of the array how, and if you do not find one, take leftmost or rightmost
+   * perhaps matching thing iff lastResort is true, otherwise return
+   * <code>null</code>.
    */
-  protected Parse traverseLocate(Parse[] daughterTrees, String[] how, boolean lastResort) {
+  protected Parse traverseLocate(Parse[] daughterTrees, String[] how,
+      boolean lastResort) {
     int headIdx;
     if (how[0].equals("left")) {
       headIdx = findLeftHead(daughterTrees, how);
@@ -171,16 +184,13 @@ public class AbstractHeadFinder implements HeadFinder {
     } else if (how[0].equals("rightexcept")) {
       headIdx = findRightExceptHead(daughterTrees, how);
     } else {
-      throw new IllegalStateException("ERROR: invalid direction type " + how[0] + " to nonTerminalInfo map in AbstractCollinsHeadFinder.");
+      throw new IllegalStateException("ERROR: invalid direction type " + how[0]
+          + " to nonTerminalInfo map in AbstractCollinsHeadFinder.");
     }
 
     // what happens if our rule didn't match anything
     if (headIdx < 0) {
       if (lastResort) {
-        // use the default rule to try to match anything except categoriesToAvoid
-        // if that doesn't match, we'll return the left or rightmost child (by
-        // setting headIdx).  We want to be careful to ensure that postOperationFix
-        // runs exactly once.
         String[] rule;
         if (how[0].startsWith("left")) {
           headIdx = 0;
@@ -196,7 +206,8 @@ public class AbstractHeadFinder implements HeadFinder {
           return daughterTrees[headIdx];
         }
       } else {
-        // if we're not the last resort, we can return null to let the next rule try to match
+        // if we're not the last resort, we can return null to let the next rule
+        // try to match
         return null;
       }
     }
@@ -288,41 +299,35 @@ public class AbstractHeadFinder implements HeadFinder {
   }
 
   public void printHeads(Parse parse) {
-	  LinkedList<Parse> nodes = new LinkedList<Parse>();
-	    nodes.add(parse);
-	    // This is a recursive iteration over the whole parse tree
-	    while (!nodes.isEmpty()) {
-	      Parse currentNode = nodes.removeFirst();
-	      // When a node is here its '=H' annotation has already happened
-	      // so it '=H' has to be removed to match with the head rules
-	      Parse headChild = null;
-	      // For every child, if it is the head, annotate with '=H'
-	      // and also add to the queue for the recursive processing
-	      Parse[] children = currentNode.getChildren();
-	      for (int i = 0; i < children.length; i++) {
-	        if (children[i].getChildCount() > 1) {
-	    	  headChild = determineHead(children[i]);
-	    	  if (DEBUG) { 
-	    		  System.err.println("headChild of " + children[i].getType() + " is " + headChild.getType());  
-	    	  }
-	    	  
-	        if (children[i].getChildren()[children[i].indexOf(headChild)] != null) {
-	          children[children[i].indexOf(headChild)].setType(headChild.getType() + "=H");
-	        }
-	        nodes.addLast(children[i]);
-	      }
-	      
-	      }
-	    }
-	}
-
+    LinkedList<Parse> nodes = new LinkedList<Parse>();
+    nodes.add(parse);
+    while (!nodes.isEmpty()) {
+      Parse currentNode = nodes.removeFirst();
+      Parse headChild = null;
+      for (Parse child : currentNode.getChildren()) {
+        // check that is not leaf
+        if (child.getChildCount()  > 0 && !child.isPosTag()) {
+          headChild = determineHead(child);
+          if (DEBUG) {
+            System.err.println("headChild of " + child.getType() + " is "
+                + headChild.getType());
+          } 
+            child.getChildren()[child.indexOf(headChild)].setType(headChild
+                .getType() + "=H"); 
+        }
+        nodes.addLast(child);
+      }
+    }
+  }
 
   /**
-   * A way for subclasses to fix any heads under special conditions.
-   * The default does nothing.
-   *
-   * @param headIdx       The index of the proposed head
-   * @param daughterTrees The array of daughter trees
+   * A way for subclasses to fix any heads under special conditions. The default
+   * does nothing.
+   * 
+   * @param headIdx
+   *          The index of the proposed head
+   * @param daughterTrees
+   *          The array of daughter trees
    * @return The new headIndex
    */
   protected int postOperationFix(int headIdx, Parse[] daughterTrees) {
