@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.Set;
 
 import opennlp.tools.parser.Parse;
+import opennlp.tools.parser.Parser;
 
 public class AbstractHeadFinder implements HeadFinder {
 
   private static final boolean DEBUG = true;
   protected Map<String, String[][]> headRules;
-  protected Set<String> preTerminals = new HashSet<String>(Arrays.asList("PRP")); 
+  private final String headMark = "=H";
 
   /**
    * Default direction if no rule is found for category (the head/parent).
@@ -125,7 +126,7 @@ public class AbstractHeadFinder implements HeadFinder {
    */
   protected Parse determineNonTrivialHead(Parse t, Parse parent) {
     Parse theHead = null;
-    String motherCat = t.getType().replace("=H", "");
+    String motherCat = t.getType().replace(headMark, "");
     if (DEBUG) {
       System.err.println("Looking for head of " + t.getType() + "; value is |"
           + t.getType() + "|, " + " baseCat is |" + motherCat + '|');
@@ -304,6 +305,9 @@ public class AbstractHeadFinder implements HeadFinder {
     while (!nodes.isEmpty()) {
       Parse currentNode = nodes.removeFirst();
       Parse headChild = null;
+      if (currentNode.getType().equals(opennlp.tools.parser.AbstractBottomUpParser.TOP_NODE)) { 
+        currentNode.getChildren()[0].setType(currentNode.getChildren()[0].getType() + headMark);
+      }
       for (Parse child : currentNode.getChildren()) {
         // check that is not leaf
         if (child.getChildCount()  > 0 && !child.isPosTag()) {
@@ -313,7 +317,7 @@ public class AbstractHeadFinder implements HeadFinder {
                 + headChild.getType());
           } 
             child.getChildren()[child.indexOf(headChild)].setType(headChild
-                .getType() + "=H"); 
+                .getType() + headMark); 
         }
         nodes.addLast(child);
       }
