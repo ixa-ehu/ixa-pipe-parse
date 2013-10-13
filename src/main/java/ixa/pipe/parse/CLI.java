@@ -39,9 +39,9 @@ import org.jdom2.JDOMException;
 /**
  * ixa-pipe-parse: Constituent Parsing: 
  * 
- *  - Using Apache OpenNLP for training and deploying models. 
- *  - Providing extra support for Collins and Stanford Semantic Head Finder, 
- *    useful for coreference resolution, for example.
+ *  - Using Apache OpenNLP API for training and deploying models. 
+ *  - Providing extra support for Collins and Stanford Semantic Head Finders, 
+ *    the latter useful for coreference resolution, for example.
  *  - Outputs KAF and penn treebank formats.  
  *    
  * @author ragerri
@@ -149,7 +149,7 @@ public class CLI {
           if (headFinderOption.equalsIgnoreCase("collins")) {
             headFinder = new CollinsHeadFinder();
           } else {
-        	  headFinder = new EnglishSemanticHeadFinder(true);
+        	  headFinder = new EnglishSemanticHeadFinder();
           }
         }
         if (lang.equalsIgnoreCase("es")) {

@@ -27,24 +27,26 @@ import opennlp.tools.parser.Parse;
  *  
  * 2013/10: Originally based on the HeadRules for English of OpenNLP which read 
  * the rules from a file. We instead harcoded the rules here to code much more 
- * easily the various traversal methods. This hardcoded is originally based on 
- * an implementation of the CollinsHeadFinder.java of Stanford CoreNLP, but we still
- * rely on the Apache OpenNLP API to handle Parse tree traversals and so on. 
+ * easily the various traversal methods. This is done by creating a headRules map 
+ * in which the key is the non terminal constituent for which we need to find a head node 
+ * and the values are String[][] 2d arrays. For each row in String[][], the first column is the 
+ * tree traversal method and the rest of the columns the tags to be considered as head.  
  * 
- * The deployment of these rules in the AbstractHeadFinder.java class is a complete
- * reimplementation of the opennlp.tools.parser.HeadRules.en.HeadRules.java class. 
+ * This representation of headRules is now based on the Stanford parser 
+ * implementation of Collins' rules in the CollinsHeadFinder.java class. This class has been 
+ * modified to work with the Apache OpenNLP API, on which our parser models have been trained.  
  * 
- * This reimplementation allows now to coherently traverse the tree to mark the head nodes 
- * via 6 different methods (see AbstractHeadFinder). 
+ * Thus, the deployment of these rules in the AbstractHeadFinder.java class is a reimplementation
+ * of the Stanford parser to work with the Apache OpenNLP API and objects to traverse the 
+ * Apache OpenNLP Parse tree objects to mark the head nodes via AbstractHeadFinder.java
  * 
  * @author ragerri 
  * 
  */
 public class CollinsHeadFinder extends AbstractHeadFinder {
-
   
-  public CollinsHeadFinder() {
-    super();
+  public CollinsHeadFinder(String... categoriesToAvoid) {
+    super(categoriesToAvoid);
     
     headRules = new HashMap<String, String[][]>();
     // This version from Collins' diss (1999: 236-238)
@@ -72,16 +74,38 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
     headRules.put("WHADVP", new String[][]{{"right", "CC", "WRB"}});
     headRules.put("WHNP", new String[][]{{"left", "WDT", "WP", "WP$", "WHADJP", "WHPP", "WHNP"}});
     headRules.put("WHPP", new String[][]{{"right", "IN", "TO", "FW"}});
-    headRules.put("X", new String[][]{{"right"}}); // crap rule
+    headRules.put("X", new String[][]{{"right"}});
     headRules.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "POS", "JJR"}, {"left", "NP"}, {"rightdis", "$", "ADJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}});
+    // these last three added by Stanford parser
     headRules.put("TYPO", new String[][] {{"left"}});
     headRules.put("EDITED", new String[][] {{"left"}});
     headRules.put("XS", new String[][] {{"right", "IN"}});
   }
     
-  
-  // TODO
-  protected void postOperationFix(Parse headNode, Parse[] children) { 
+  /* (non-Javadoc)
+   * @see ixa.pipe.heads.AbstractHeadFinder#postOperationFix(int, opennlp.tools.parser.Parse[])
+   * 
+   * This fixes the headWord found. If its previous node is a conjunction, it keeps going up 
+   * the tree looking for a head until a node is found that is not punctuation or a leaf. 
+   * 
+   */
+  @Override
+  protected int correctFoundHeads(int headIndex, Parse[] children) {
+    if (headIndex >= 2) {
+      String prevLab = children[headIndex - 1].getType();
+      if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
+        int newHeadIndex = headIndex - 2;
+        Parse t = children[newHeadIndex];
+        while (newHeadIndex >= 0 && (t.getChildCount() ==  1 && t.getChildren()[0].getChildCount() == 0) &&
+            punctSet.contains(t.getType())) {
+          newHeadIndex--;
+        }
+        if (newHeadIndex >= 0) {
+          headIndex = newHeadIndex;
+        }
+      }
+    }
+    return headIndex;
     
   }
 

@@ -15,25 +15,44 @@
    limitations under the License.
  */
 
-
 package ixa.pipe.heads;
 
 import opennlp.tools.parser.Parse;
 
 /**
+ * Interface to provide head finder methods. These methods are implemented in the AbstractHeadFinder 
+ * class. 
+ * 
  * @author ragerri
- *
+ * 
  */
 
+  public interface HeadFinder {
 
-public interface HeadFinder {
-	
-	/**
-	 * It reads a Parse object and adds the heads for each constituent following
-	 * some head rules. 
-	 * 
-	 * @param parse
-	 */
-	public void printHeads(Parse parse);
+    /**
+     * It finds the head of the parse constituent according to some head rules 
+     * 
+     * @param parse
+     * @return Parse head constituent
+     */
+    public Parse getHead(Parse parse);
+
+    /**
+     * It finds the head of the parse constituent according to some head rules
+     * 
+     * @param parse
+     * @param parent
+     * @return Parse head constituent 
+     */
+    public Parse getHead(Parse parse, Parse parent);
+    
+    /**
+     * It reads a Parse object and adds the head "=H" symbol for each constituent's 
+     * head Node applying some head rules.
+     * 
+     * @param parse
+     */
+      public void printHeads(Parse parse);
+
 
 }

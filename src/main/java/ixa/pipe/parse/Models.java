@@ -17,13 +17,22 @@
 package ixa.pipe.parse;
 
 import java.io.InputStream;
+import java.util.Date;
 
+/**
+ * Class to load the language-dependent resources. Mainly models but also head rules files if 
+ * required. Resources are located according to maven project structure: $src/main/resources/
+ * 
+ * @author ragerri
+ *
+ */
 public class Models {
 
   private InputStream parseModel;
   private InputStream headsFile; 
   
   public InputStream getParseModel(String cmdOption) {
+    long lStartTime = new Date().getTime();
 
     if (cmdOption.equals("en")) {
       parseModel = getClass().getResourceAsStream("/en-parser-chunking.bin");
@@ -32,6 +41,10 @@ public class Models {
     if (cmdOption.equals("es")) {
       parseModel = getClass().getResourceAsStream("/es-parser-chunking.bin");
     }
+    
+    long lEndTime = new Date().getTime();
+    long difference = lEndTime - lStartTime;
+    System.err.println("Parse model loaded in: " + difference + " seconds ... [DONE]");
     return parseModel;
   }
   

@@ -40,7 +40,6 @@ public class Annotate {
   private ConstituentParsing parser;
   private Models modelRetriever;
   private HeadFinder headFinder;
-  StringBuffer parsingDoc;
 
   /**
    * Constructor that takes into account lang options (en|es) loads the
@@ -53,7 +52,6 @@ public class Annotate {
     InputStream parseModel = modelRetriever.getParseModel(lang);
     parser = new ConstituentParsing(parseModel);
     MARKHEADS = false;
-    parsingDoc = new StringBuffer();
   }
 
   /**
@@ -70,15 +68,13 @@ public class Annotate {
     parser = new ConstituentParsing(parseModel);
     this.headFinder = headFinder;
     MARKHEADS = true;
-    parsingDoc = new StringBuffer();
   }
 
   /**
    * It takes an array of tokens and outputs a string with tokens joined by a
    * whitespace.
    * 
-   * @param array
-   *          of tokens
+   * @param array of tokens
    * @return string representing one sentence for each array
    */
   private String getSentenceFromTokens(String[] tokens) {
@@ -97,7 +93,7 @@ public class Annotate {
    * @throws IOException
    */
   private StringBuffer getParse(KAFDocument kaf) throws IOException {
-
+    StringBuffer parsingDoc = new StringBuffer();
     List<List<WF>> sentences = kaf.getSentences();
     for (List<WF> sentence : sentences) {
       // get array of token forms from a list of WF objects
@@ -132,7 +128,7 @@ public class Annotate {
    * @throws IOException
    */
   public String parseToKAF(KAFDocument kaf) throws IOException {
-    parsingDoc = getParse(kaf);
+    StringBuffer parsingDoc = getParse(kaf);
     try {
       kaf.addConstituencyFromParentheses(parsingDoc.toString());
     } catch (Exception e) {
@@ -148,7 +144,7 @@ public class Annotate {
    * @throws IOException
    */
   public String parse(KAFDocument kaf) throws IOException {
-    parsingDoc = getParse(kaf);
+    StringBuffer parsingDoc = getParse(kaf);
     return parsingDoc.toString();
   }
 

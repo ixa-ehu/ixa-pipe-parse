@@ -2,12 +2,24 @@
 IXA-pipe-parse
 =================
 
-This module uses Apache OpenNLP programatically to train and provide Constituent Parsing
-models for English and Spanish. English models have been trained using the Penn treebank and Spanish models
-using the Ancora corpus (http://clic.ub.edu/corpus/en/ancora).
-
 This module is part of IXA-Pipeline ("is a pipeline"), a multilingual NLP pipeline
 developed by the IXA NLP Group (ixa.si.ehu.es).
+
+Ixa-pipe-parse provides:
+   - Constituent parsing for English and Spanish.
+   - HeadFinders based on Collins head rules (Michael Collins PhD thesis, 1999) and
+     Stanford's parser Semantic Head Rules.
+   - Outputs to KAF by default (https://github.com/opener-project/kaf/wiki/KAF-structure-overview)
+     but also in Penn Treebank oneline style.
+
+English models have been trained using the Penn treebank and Spanish models
+using the Ancora corpus (http://clic.ub.edu/corpus/en/ancora) and the Apache OpenNLP API.
+The training is based on Maximum Entropy models for parsing as described by Adwait Ratnaparkhi's PhD thesis (1998).
+
+ixa-pipe-parse development has been partially funded by the OpeNER FP7 European Project (http://www.opener-project.org),
+under grant agreement No. 296451.
+
+ixa-pipe-parse is distributed under Apache License version 2.0 (see LICENSE.txt for details).
 
 Contents
 ========
@@ -26,23 +38,23 @@ INSTALLATION
 
 Installing the ixa-pipe-parse requires the following steps:
 
-If you already have installed in your machine JDK6 and MAVEN 3, please go to step 3
+If you already have installed in your machine JDK7 and MAVEN 3, please go to step 3
 directly. Otherwise, follow these steps:
 
-1. Install JDK 1.6
+1. Install JDK 1.7
 -------------------
 
 If you do not install JDK 1.6 in a default location, you will probably need to configure the PATH in .bashrc or .bash_profile:
 
 ````shell
-export JAVA_HOME=/yourpath/local/java6
+export JAVA_HOME=/yourpath/local/java7
 export PATH=${JAVA_HOME}/bin:${PATH}
 ````
 
 If you use tcsh you will need to specify it in your .login as follows:
 
 ````shell
-setenv JAVA_HOME /usr/java/java16
+setenv JAVA_HOME /usr/java/java17
 setenv PATH ${JAVA_HOME}/bin:${PATH}
 ````
 
@@ -52,7 +64,7 @@ If you re-login into your shell and run the command
 java -version
 ````
 
-You should now see that your jdk is 1.6
+You should now see that your jdk is 1.7
 
 2. Install MAVEN 3
 ------------------
@@ -125,7 +137,7 @@ Most importantly, there you will find the module executable:
 ixa-pipe-parse-1.0.jar
 
 This executable contains every dependency the module needs, so it is completely portable as long
-as you have a JVM 1.6 installed.
+as you have a JVM 1.7 installed.
 
 To install the module in the local maven repository, usually located in ~/.m2/, execute:
 
@@ -136,17 +148,27 @@ mvn clean install
 7. USING ixa-pipe-parse
 ==========================
 
-The program takes tokenized text in KAF form (e.g., <wf> elements) as standard input and outputs syntactic analysis
-in treebank format to standard output.
+The program takes tokenized and POS-tagged text in KAF form (e.g., <text> and <terms> elements)
+as standard input and outputs syntactic analysis (both in KAF <constituents> or in Treebank format into
+standard output.
 
-http://kyoto-project.eu/www2.let.vu.nl/twiki/pub/Kyoto/TechnicalPapers/WP002_TR009_KAF_Framework.pdf
+https://github.com/opener-project/kaf/wiki/KAF-structure-overview
 
-The tokenized text in <wf> KAF elements can be obtained by running ixa-pipe-tok.
+The tokenized and POS-tagged input KAF in <text> and <terms> KAF elements can be obtained by piping
+ixa-pipe-tok (http://github.com/ixa-ehu/ixa-pipe-tok) and ixa-pipe-pos (http://github.com/ixa-pipe-pos) or
+by providing an already processed document containing this information.
 
 To run the program execute:
 
 ````shell
-cat wordforms.kaf | java -jar $PATH/target/ixa-pipe-parse-1.0.jar
+cat infile.kaf | java -jar $PATH/target/ixa-pipe-parse-1.0.jar
+````
+This will output the constituent parse tree into a KAF document.
+
+Run the parser with the -help parameter for a description of other available options.
+
+````shell
+java -jar $PATH/target/ixa-pipe-parse-1.0.jar -help
 ````
 
 GENERATING JAVADOC
