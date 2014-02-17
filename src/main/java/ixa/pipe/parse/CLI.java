@@ -39,9 +39,9 @@ import org.jdom2.JDOMException;
 /**
  * ixa-pipe-parse: Constituent Parsing: 
  * 
- *  - Using Apache OpenNLP API for training and deploying models. 
+ *  - Using Apache OpenNLP Machine Learning API for training and deploying models. 
  *  - Providing extra support for Collins and Stanford Semantic Head Finders, 
- *    the latter useful for coreference resolution, for example.
+ *    the latter useful for coreference resolution and dependency conversion.
  *  - Outputs KAF and penn treebank formats.  
  *    
  * @author ragerri
@@ -71,7 +71,7 @@ public class CLI {
     ArgumentParser parser = ArgumentParsers.newArgumentParser(
         "ixa-pipe-parse-1.0.jar").description(
         "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
-            + "developed by IXA NLP Group using on Apache OpenNLP API.\n");
+            + "developed by IXA NLP Group.\n");
 
     parser.addArgument("-k","--nokaf").action(Arguments.storeFalse()).help("Do not print parse in KAF format, but plain text.");
     parser.addArgument("-o", "--outputFormat").choices("penn", "oneline")
