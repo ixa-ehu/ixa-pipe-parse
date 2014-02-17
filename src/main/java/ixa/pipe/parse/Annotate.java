@@ -102,7 +102,7 @@ public class Annotate {
         tokens[i] = sentence.get(i).getForm();
       }
       // Constituent Parsing
-      String sent = this.getSentenceFromTokens(tokens);
+      String sent = getSentenceFromTokens(tokens);
       Parse parsedSentence[] = parser.parse(sent, 1);
 
       if (MARKHEADS) {

@@ -90,7 +90,7 @@ public class CLI {
         .choices("en","es")
         .required(false)
         .help(
-            "It is REQUIRED to choose a language to perform annotation with ixa-pipe-parse");
+            "Choose a language to perform annotation with ixa-pipe-parse");
     
     /*
      * Parse the command line arguments

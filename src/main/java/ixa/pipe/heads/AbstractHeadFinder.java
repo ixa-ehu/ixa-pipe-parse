@@ -54,13 +54,6 @@ public abstract class AbstractHeadFinder implements HeadFinder {
   
   /**
    * Construct a HeadFinder.
-   * The TreebankLanguagePack is used to get basic categories. The remaining arguments
-   * set categories which, if it comes to last resort processing (i.e., none of
-   * the rules matched), will be avoided as heads. In last resort processing,
-   * it will attempt to match the leftmost or rightmost constituent not in this
-   * set but will fall back to the left or rightmost constituent if necessary.
-   *
-   * @param tlp TreebankLanguagePack used to determine basic category
    * @param categoriesToAvoid Constituent types to avoid as head
    */
   protected AbstractHeadFinder(String... categoriesToAvoid) {
