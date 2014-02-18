@@ -24,6 +24,7 @@ import ixa.pipe.heads.HeadFinder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -82,8 +83,7 @@ public class CLI {
     parser.addArgument("-g", "--heads").choices("collins", "sem")
             .required(false)
             .help("Choose between Collins-based or Stanford Semantic HeadFinder");
-    
-    
+       
     // specify language
     parser
         .addArgument("-l", "--lang")
@@ -91,6 +91,9 @@ public class CLI {
         .required(false)
         .help(
             "Choose a language to perform annotation with ixa-pipe-parse");
+    
+    parser.addArgument("--processTreebankWithHeadWords").help("Add headwords to a file containing one syntactic " +
+    " tree in Penn Treebank format.");
     
     /*
      * Parse the command line arguments
@@ -116,24 +119,31 @@ public class CLI {
     } else {
       headFinderOption = parsedArguments.getString("heads");
     }
-
-    BufferedReader breader = null;
-    BufferedWriter bwriter = null;
+    HeadFinder headFinder = null; 
     
     try {
-      breader = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
-      bwriter = new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
+      
+      if (parsedArguments.getString("processTreebankWithHeadWords") != null) { 
+        File inputTree = new File(parsedArguments.getString("processTreebankWithHeadWords"));
+        String lang = parsedArguments.getString("lang");
+        Annotate annotator = new Annotate(lang,headFinder);
+        annotator.processTreebankWithHeadWords(inputTree);
+      }
+      
+      else {
+        
+      BufferedReader breader = new BufferedReader(new InputStreamReader(System.in,"UTF-8"));
+      BufferedWriter bwriter = new BufferedWriter(new OutputStreamWriter(System.out,"UTF-8"));
       KAFDocument kaf = KAFDocument.createFromStream(breader);
       
       // language parameter
       String lang;
       if (parsedArguments.get("lang") == null) { 
-      	  lang = kaf.getLang();
+          lang = kaf.getLang();
         }
         else { 
-      	 lang =  parsedArguments.getString("lang");
+         lang =  parsedArguments.getString("lang");
         }
-      
       // construct kaf Reader and read from standard input
       
       kaf.addLinguisticProcessor("constituency", "ixa-pipe-parse-"+lang, "1.0");
@@ -141,7 +151,7 @@ public class CLI {
      // choosing HeadFinder: (Collins rules; sem Semantic headFinder re-implemented from
       // Stanford CoreNLP. Default: sem (semantic head finder).
 
-      HeadFinder headFinder = null;
+      
 
       if (!headFinderOption.isEmpty()) {
         if (lang.equalsIgnoreCase("en")) {
@@ -167,7 +177,6 @@ public class CLI {
         else { 
           bwriter.write(annotator.parse(kaf));
         }
-          
       }
         // parse without heads
       else {
@@ -177,11 +186,10 @@ public class CLI {
         }
         else { 
           bwriter.write(annotator.parse(kaf));
-        }
-        
+        } 
       }
-
       bwriter.close();
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }

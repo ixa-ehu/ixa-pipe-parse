@@ -20,9 +20,13 @@ import ixa.kaflib.KAFDocument;
 import ixa.kaflib.WF;
 import ixa.pipe.heads.HeadFinder;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import opennlp.tools.parser.Parse;
 
@@ -74,7 +78,8 @@ public class Annotate {
    * It takes an array of tokens and outputs a string with tokens joined by a
    * whitespace.
    * 
-   * @param array of tokens
+   * @param array
+   *          of tokens
    * @return string representing one sentence for each array
    */
   private String getSentenceFromTokens(String[] tokens) {
@@ -146,6 +151,34 @@ public class Annotate {
   public String parse(KAFDocument kaf) throws IOException {
     StringBuffer parsingDoc = getParse(kaf);
     return parsingDoc.toString();
+  }
+
+  private String addHeadWordsToTreebank(String inputTree) {
+    StringBuffer parsedDoc = new StringBuffer();
+    Parse parsedSentence = Parse.parseParse(inputTree);
+    headFinder.printHeads(parsedSentence);
+    parsedSentence.show(parsedDoc);
+    return parsedDoc.toString();
+  }
+
+  public void processTreebankWithHeadWords(File dir) throws IOException {
+
+    File listFile[] = dir.listFiles();
+    if (listFile != null) {
+      for (int i = 0; i < listFile.length; i++) {
+        if (listFile[i].isDirectory()) {
+          processTreebankWithHeadWords(listFile[i]);
+        } else {
+          File outfile = new File(FilenameUtils.removeExtension(listFile[i]
+              .getPath()) + ".th");
+          String outTree = addHeadWordsToTreebank(listFile[i].getName());
+          FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
+          System.err.println(">> Wrote headWords to Penn Treebank to "
+              + outfile);
+          System.err.println(listFile[i].getPath());
+        }
+      }
+    }
   }
 
 }
