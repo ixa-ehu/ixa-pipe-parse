@@ -92,8 +92,8 @@ public class CLI {
         .help(
             "Choose a language to perform annotation with ixa-pipe-parse");
     
-    parser.addArgument("--processTreebankWithHeadWords").help("Add headwords to a file containing one syntactic " +
-    " tree in Penn Treebank format.");
+    parser.addArgument("--processTreebankWithHeadWords")
+    .help("Add headwords to a file containing one syntactic tree in Penn Treebank format; this option requires language, headFinder and --nokaf options specified.");
     
     /*
      * Parse the command line arguments
@@ -102,6 +102,7 @@ public class CLI {
     // catch errors and print help
     try {
       parsedArguments = parser.parseArgs(args);
+      System.err.println("CLI options: " + parsedArguments);
     } catch (ArgumentParserException e) {
       parser.handleError(e);
       System.out
@@ -126,6 +127,23 @@ public class CLI {
       if (parsedArguments.getString("processTreebankWithHeadWords") != null) { 
         File inputTree = new File(parsedArguments.getString("processTreebankWithHeadWords"));
         String lang = parsedArguments.getString("lang");
+        if (!headFinderOption.isEmpty()) {
+          if (lang.equalsIgnoreCase("en")) {
+
+            if (headFinderOption.equalsIgnoreCase("collins")) {
+              headFinder = new CollinsHeadFinder();
+            } else {
+                headFinder = new EnglishSemanticHeadFinder();
+            }
+          }
+          if (lang.equalsIgnoreCase("es")) {
+            if (headFinderOption.equalsIgnoreCase("collins")) {
+              //headFinder = new CollinsHeadFinder();
+            } else {
+              //headFinder = new EnglishSemanticHeadFinder(true);
+            }
+          }
+        }
         Annotate annotator = new Annotate(lang,headFinder);
         annotator.processTreebankWithHeadWords(inputTree);
       }
@@ -148,10 +166,9 @@ public class CLI {
       
       kaf.addLinguisticProcessor("constituency", "ixa-pipe-parse-"+lang, "1.0");
       
-     // choosing HeadFinder: (Collins rules; sem Semantic headFinder re-implemented from
+      // choosing HeadFinder: (Collins rules; sem Semantic headFinder re-implemented from
       // Stanford CoreNLP. Default: sem (semantic head finder).
 
-      
 
       if (!headFinderOption.isEmpty()) {
         if (lang.equalsIgnoreCase("en")) {
