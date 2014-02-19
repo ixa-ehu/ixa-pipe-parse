@@ -164,12 +164,12 @@ public class Annotate {
     return parsedDoc.toString();
   }
 
-  public void processTreebankWithHeadWords(File dir) throws IOException {
+  public void processTreebankWithHeadWords(File dir, String ext) throws IOException {
     File listFile[] = dir.listFiles();
     if (listFile != null) {
       for (int i = 0; i < listFile.length; i++) {
         if (listFile[i].isDirectory()) {
-          processTreebankWithHeadWords(listFile[i]);
+          processTreebankWithHeadWords(listFile[i], ext);
         } else {
           List<String> inputTrees = FileUtils.readLines(new File(listFile[i].getCanonicalPath()),"UTF-8");
           File outfile = new File(FilenameUtils.removeExtension(listFile[i].getPath()) + ".th");
