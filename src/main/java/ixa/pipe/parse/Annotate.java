@@ -212,6 +212,7 @@ public class Annotate {
               List<String> inputTrees = FileUtils.readLines(new File(
                   FilenameUtils.removeExtension(listFile[i].getCanonicalPath())
                       + ext), "UTF-8");
+              System.err.println("Processing " + listFile[i].getCanonicalPath());
               File outfile = new File(FilenameUtils.removeExtension(listFile[i]
                   .getPath()) + ".th");
               String outTree = addHeadWordsToTreebank(inputTrees);
