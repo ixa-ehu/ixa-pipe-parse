@@ -21,6 +21,7 @@ import ixa.kaflib.WF;
 import ixa.pipe.heads.HeadFinder;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -173,16 +174,19 @@ public class Annotate {
 
   /**
    * Takes a file containing Penn Treebank oneline annotation and annotates the
-   * headwords, saving it to a file with the *.th extension. Optionally also 
-   * processes recursively an input directory adding heads only to the files 
+   * headwords, saving it to a file with the *.th extension. Optionally also
+   * processes recursively an input directory adding heads only to the files
    * with the files with the specified extension
    * 
-   * @param dir the input file or directory
-   * @param ext the extension to look for in the directory
+   * @param dir
+   *          the input file or directory
+   * @param ext
+   *          the extension to look for in the directory
    * @throws IOException
    */
   public void processTreebankWithHeadWords(File dir, String ext)
       throws IOException {
+    // process one file
     if (dir.isFile()) {
       List<String> inputTrees = FileUtils.readLines(
           new File(dir.getCanonicalPath()), "UTF-8");
@@ -191,28 +195,31 @@ public class Annotate {
       String outTree = addHeadWordsToTreebank(inputTrees);
       FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
       System.err.println(">> Wrote headWords to Penn Treebank to " + outfile);
-      System.err.println(dir.getPath());
     } else {
+      // recursively process directories
       File listFile[] = dir.listFiles();
       if (listFile != null) {
+        if (ext == null) {
+          System.out
+              .println("For recursive directory processing of treebank files specify the extension of the files containing the syntactic trees.");
+          System.exit(1);
+        }
         for (int i = 0; i < listFile.length; i++) {
           if (listFile[i].isDirectory()) {
             processTreebankWithHeadWords(listFile[i], ext);
           } else {
-            if (!ext.isEmpty() && FilenameUtils.isExtension(listFile[i].toString(), ext)) {
+            try {
               List<String> inputTrees = FileUtils.readLines(new File(
-                  listFile[i].getCanonicalPath()), "UTF-8");
+                  FilenameUtils.removeExtension(listFile[i].getCanonicalPath())
+                      + ext), "UTF-8");
               File outfile = new File(FilenameUtils.removeExtension(listFile[i]
                   .getPath()) + ".th");
               String outTree = addHeadWordsToTreebank(inputTrees);
               FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
-              System.err.println(">> Wrote headWords to Penn Treebank to "
+              System.err.println(">> Wrote headWords to "
                   + outfile);
-              System.err.println(listFile[i].getPath());
-            } else {
-              System.out
-                  .println("For recursive directory processing of treebank files specify the extension of the files containing the syntactic trees.");
-              System.exit(1);
+            } catch (FileNotFoundException noFile) {
+              continue;
             }
           }
         }
