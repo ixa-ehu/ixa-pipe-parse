@@ -74,15 +74,15 @@ public class CLI {
         "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
             + "developed by IXA NLP Group.\n");
 
-    parser.addArgument("-k","--nokaf").action(Arguments.storeFalse()).help("Do not print parse in KAF format, but plain text.");
+    parser.addArgument("-k","--nokaf").action(Arguments.storeFalse()).help("Do not print parse in KAF format, but plain text.\n");
     parser.addArgument("-o", "--outputFormat").choices("penn", "oneline")
             .setDefault("oneline")
             .required(false)
-            .help("Choose between Penn style or oneline LISP style tree output; this option only works if '--nokaf' is also on.");
+            .help("Choose between Penn style or oneline LISP style tree output; this option only works if '--nokaf' is also on.\n");
 
     parser.addArgument("-g", "--heads").choices("collins", "sem")
             .required(false)
-            .help("Choose between Collins-based or Stanford Semantic HeadFinder");
+            .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
        
     // specify language
     parser
@@ -90,11 +90,12 @@ public class CLI {
         .choices("en","es")
         .required(false)
         .help(
-            "Choose a language to perform annotation with ixa-pipe-parse");
+            "Choose a language to perform annotation with ixa-pipe-parse.\n");
     
     parser.addArgument("--processTreebankWithHeadWords")
-    .help("Add headwords to a file containing one syntactic tree in Penn Treebank format; this option requires language, headFinder and --nokaf options specified.");
+    .help("Add headwords to a file containing one syntactic tree in Penn Treebank format; this option requires --lang, --heads and --nokaf options specified.\n");
     
+    parser.addArgument("--extension").help("Specify extension of files to be processed by the --processTreebankWithHeadWords directory option.\n");
     /*
      * Parse the command line arguments
      */
@@ -127,6 +128,7 @@ public class CLI {
       if (parsedArguments.getString("processTreebankWithHeadWords") != null) { 
         File inputTree = new File(parsedArguments.getString("processTreebankWithHeadWords"));
         String lang = parsedArguments.getString("lang");
+        String ext = parsedArguments.getString("extension");
         if (!headFinderOption.isEmpty()) {
           if (lang.equalsIgnoreCase("en")) {
 
@@ -145,7 +147,7 @@ public class CLI {
           }
         }
         Annotate annotator = new Annotate(lang,headFinder);
-        annotator.processTreebankWithHeadWords(inputTree);
+        annotator.processTreebankWithHeadWords(inputTree,ext);
       }
       
       else {
