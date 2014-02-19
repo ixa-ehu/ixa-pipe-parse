@@ -153,9 +153,16 @@ public class Annotate {
     return parsingDoc.toString();
   }
 
+  /**
+   * Takes as input a list of parse strings, one for line, 
+   * and annotates the headwords
+   * 
+   * @param inputTrees
+   * @return a list of parse trees with headwords annotated
+   */
   private String addHeadWordsToTreebank(List<String> inputTrees) {
     StringBuffer parsedDoc = new StringBuffer();
-    for (String parseSent : inputTrees) { 
+    for (String parseSent : inputTrees) {
       Parse parsedSentence = Parse.parseParse(parseSent);
       headFinder.printHeads(parsedSentence);
       parsedSentence.show(parsedDoc);
@@ -164,19 +171,41 @@ public class Annotate {
     return parsedDoc.toString();
   }
 
+  /**
+   * Takes a file containing Penn Treebank oneline annotation and 
+   * annotates the headwords, saving it to a file with the *.th 
+   * extension 
+   * 
+   * @param dir
+   * @throws IOException
+   */
   public void processTreebankWithHeadWords(File dir) throws IOException {
-    File listFile[] = dir.listFiles();
-    if (listFile != null) {
-      for (int i = 0; i < listFile.length; i++) {
-        if (listFile[i].isDirectory()) {
-          processTreebankWithHeadWords(listFile[i]);
-        } else {
-          List<String> inputTrees = FileUtils.readLines(new File(listFile[i].getCanonicalPath()),"UTF-8");
-          File outfile = new File(FilenameUtils.removeExtension(listFile[i].getPath()) + ".th");
-          String outTree = addHeadWordsToTreebank(inputTrees);
-          FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
-          System.err.println(">> Wrote headWords to Penn Treebank to " + outfile);
-          System.err.println(listFile[i].getPath());
+    if (dir.isFile()) {
+      List<String> inputTrees = FileUtils.readLines(
+          new File(dir.getCanonicalPath()), "UTF-8");
+      File outfile = new File(FilenameUtils.removeExtension(dir.getPath())
+          + ".th");
+      String outTree = addHeadWordsToTreebank(inputTrees);
+      FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
+      System.err.println(">> Wrote headWords to Penn Treebank to " + outfile);
+      System.err.println(dir.getPath());
+    } else {
+      File listFile[] = dir.listFiles();
+      if (listFile != null) {
+        for (int i = 0; i < listFile.length; i++) {
+          if (listFile[i].isDirectory()) {
+            processTreebankWithHeadWords(listFile[i]);
+          } else {
+            List<String> inputTrees = FileUtils.readLines(
+                new File(listFile[i].getCanonicalPath()), "UTF-8");
+            File outfile = new File(FilenameUtils.removeExtension(listFile[i]
+                .getPath()) + ".th");
+            String outTree = addHeadWordsToTreebank(inputTrees);
+            FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
+            System.err.println(">> Wrote headWords to Penn Treebank to "
+                + outfile);
+            System.err.println(listFile[i].getPath());
+          }
         }
       }
     }
