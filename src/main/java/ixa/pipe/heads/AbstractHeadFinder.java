@@ -404,21 +404,21 @@ public abstract class AbstractHeadFinder implements HeadFinder {
   * right order of the tree. 
   *
   * @ param parse the parse tree
-  * @param y The list in which the preterminals of the tree will be
+  * @param preTerminalsy The list in which the preterminals of the tree will be
   *          placed. Normally, this will be empty when the routine is called,
   *          but if not, the new yield is added to the end of the list.
   * @return a <code>List</code> of the data in the tree's pre-leaves.
   */
- public List<String> preTerminalYield(Parse parse, List<String> y) {
+ public List<String> preTerminalYield(Parse parse, List<String> preTerminals) {
    if (parse.getChildCount() == 1 && parse.getChildren()[0].getChildCount() == 0) {
-     y.add(parse.getType());
+     preTerminals.add(parse.getType());
    } else {
      Parse[] children = parse.getChildren();
      for (int i = 0; i < children.length; i++) {
-       this.preTerminalYield(children[i], y);
+       this.preTerminalYield(children[i], preTerminals);
      }
    }
-   return y;
+   return preTerminals;
  }
  
  /**
