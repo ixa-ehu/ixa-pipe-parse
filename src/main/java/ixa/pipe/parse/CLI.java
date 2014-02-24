@@ -103,7 +103,6 @@ public class CLI {
         .help(
             "Specify extension of files, e.g. '.txt' or '' for every file, to be processed by the --processTreebankWithHeadWords directory option.\n");
     
-    parser.addArgument("--treebank2WordPos").help("Converts Treebank into Apache OpenNLP POS training format.\n");
     
     /*
      * Parse the command line arguments
@@ -159,15 +158,6 @@ public class CLI {
         }
         Annotate annotator = new Annotate(lang, headFinder);
         annotator.processTreebankWithHeadWords(inputTree, ext);
-      }
-      
-      // special option to process treebank files adding headword marks
-      else if (parsedArguments.getString("treebank2WordPos") != null) {
-        File inputTree = new File(
-            parsedArguments.getString("treebank2WordPos"));
-        String lang = parsedArguments.getString("lang");
-        Annotate annotator = new Annotate(lang);
-        annotator.treebank2WordPos(inputTree);
       }
 
       else {// normal parsing stdin and stdout
