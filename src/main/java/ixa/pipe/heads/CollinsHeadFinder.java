@@ -50,18 +50,18 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
     
     headRules = new HashMap<String, String[][]>();
     // This version from Collins' diss (1999: 236-238)
-    headRules.put("ADJP", new String[][]{{"left", "NNS", "QP", "NN", "$", "ADVP", "JJ", "VBN", "VBG", "ADJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}} );
+    headRules.put("ADJP", new String[][]{{"left", "NNS", "QP", "NN", "\\$", "ADVP", "JJ", "VBN", "VBG", "ADJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}} );
     headRules.put("ADVP", new String[][]{{"right", "RB", "RBR", "RBS", "FW", "ADVP", "TO", "CD", "JJR", "JJ", "IN", "NP", "JJS", "NN"}});
     headRules.put("CONJP", new String[][]{{"right", "CC", "RB", "IN"}});
     headRules.put("FRAG", new String[][]{{"right"}});
     headRules.put("INTJ", new String[][]{{"left"}});
     headRules.put("LST", new String[][]{{"right", "LS", ":"}});
-    headRules.put("NAC", new String[][]{{"left", "NN", "NNS", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "FW"}});
+    headRules.put("NAC", new String[][]{{"left", "NN", "NNS", "NNP", "NNPS", "NP", "NAC", "EX", "\\$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "FW"}});
     headRules.put("NX", new String[][]{{"left"}}); 
     headRules.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW"}});
     headRules.put("PRN", new String[][]{{"left"}});
     headRules.put("PRT", new String[][]{{"right", "RP"}});
-    headRules.put("QP", new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "RB", "DT", "CD", "NCD", "QP", "JJR", "JJS"}});
+    headRules.put("QP", new String[][]{{"left", "\\$", "IN", "NNS", "NN", "JJ", "RB", "DT", "CD", "NCD", "QP", "JJR", "JJS"}});
     headRules.put("RRC", new String[][]{{"right", "VP", "NP", "ADVP", "ADJP", "PP"}});
     headRules.put("S", new String[][]{{"left", "TO", "IN", "VP", "S", "SBAR", "ADJP", "UCP", "NP"}});
     headRules.put("SBAR", new String[][]{{"left", "WHNP", "WHPP", "WHADVP", "WHADJP", "IN", "DT", "S", "SQ", "SINV", "SBAR", "FRAG"}});
@@ -72,10 +72,10 @@ public class CollinsHeadFinder extends AbstractHeadFinder {
     headRules.put("VP", new String[][]{{"left", "TO", "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "AUX", "AUXG", "VP", "ADJP", "NN", "NNS", "NP"}});
     headRules.put("WHADJP", new String[][]{{"left", "CC", "WRB", "JJ", "ADJP"}});
     headRules.put("WHADVP", new String[][]{{"right", "CC", "WRB"}});
-    headRules.put("WHNP", new String[][]{{"left", "WDT", "WP", "WP$", "WHADJP", "WHPP", "WHNP"}});
+    headRules.put("WHNP", new String[][]{{"left", "WDT", "WP", "WP\\$", "WHADJP", "WHPP", "WHNP"}});
     headRules.put("WHPP", new String[][]{{"right", "IN", "TO", "FW"}});
     headRules.put("X", new String[][]{{"right"}});
-    headRules.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "POS", "JJR"}, {"left", "NP"}, {"rightdis", "$", "ADJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}});
+    headRules.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "POS", "JJR"}, {"left", "NP"}, {"rightdis", "\\$", "ADJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}});
     // these last three added by Stanford parser
     headRules.put("TYPO", new String[][] {{"left"}});
     headRules.put("EDITED", new String[][] {{"left"}});

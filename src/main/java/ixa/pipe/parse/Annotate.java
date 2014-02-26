@@ -109,7 +109,7 @@ public class Annotate {
       }
       // Constituent Parsing
       String sent = getSentenceFromTokens(tokens);
-      Parse parsedSentence[] = parser.parse(sent, 1);
+      Parse[] parsedSentence = parser.parse(sent, 1);
 
       if (MARKHEADS) {
         for (Parse parse : parsedSentence) {
@@ -173,6 +173,25 @@ public class Annotate {
     }
     return parsedDoc.toString();
   }
+  
+  public void parseForTesting(File inputText) throws IOException {
+    StringBuffer parsingDoc = new StringBuffer();
+    if (inputText.isFile()) { 
+      List<String> inputTrees = FileUtils.readLines(inputText,"UTF-8");
+      for (String sentence : inputTrees) { 
+        Parse parsedSentence = parser.parse(sentence,1)[0];
+        parsedSentence.show(parsingDoc);
+        parsingDoc.append("\n");
+        }
+      File outfile = new File(FilenameUtils.removeExtension(inputText.getPath())+ ".test");
+      FileUtils.writeStringToFile(outfile, parsingDoc.toString(),"UTF-8");  
+      }  
+    else { 
+      System.out.println("Choose a correct file!");
+      System.exit(1);
+    }
+  }
+  
 
   /**
    * Takes a file containing Penn Treebank oneline annotation and annotates the

@@ -72,23 +72,23 @@ public class CollinsHeadFinderModified extends AbstractHeadFinder {
 	    
 	    headRules = new HashMap<String, String[][]>();
 	    // This version of HeadRule from Stanford's CoreNLP ModCollinsHeadFinder.java 
-	    headRules.put("ADJP", new String[][]{{"left", "$"}, {"rightdis", "NNS", "NN", "JJ", "QP", "VBN", "VBG"}, {"left", "ADJP"}, {"rightdis", "JJP", "JJR", "JJS", "DT", "RB", "RBR", "CD", "IN", "VBD"}, {"left", "ADVP", "NP"}});
+	    headRules.put("ADJP", new String[][]{{"left", "\\$"}, {"rightdis", "NNS", "NN", "JJ", "QP", "VBN", "VBG"}, {"left", "ADJP"}, {"rightdis", "JJP", "JJR", "JJS", "DT", "RB", "RBR", "CD", "IN", "VBD"}, {"left", "ADVP", "NP"}});
 	    // from David Vadas, James R. Curran: Parsing Noun Phrases in the Penn Treebank. Computational Linguistics 37(4): 753-809 (2011)
-	    headRules.put("JJP", new String[][]{{"left", "NNS", "NN", "$", "QP", "JJ", "VBN", "VBG", "ADJP", "JJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}});
+	    headRules.put("JJP", new String[][]{{"left", "NNS", "NN", "\\$", "QP", "JJ", "VBN", "VBG", "ADJP", "JJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}});
 	    // head rule rewritten by C. Manning: JJ.* is often head and rightmost.
 	    headRules.put("ADVP", new String[][]{{"left", "ADVP", "IN"},{"rightdis", "RB", "RBR", "RBS", "JJ", "JJR", "JJS"},{"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}});
 	    headRules.put("CONJP", new String[][]{{"right", "CC", "RB", "IN"}});
 	    headRules.put("FRAG", new String[][]{{"right"}}); // crap
 	    headRules.put("INTJ", new String[][]{{"left"}});
 	    headRules.put("LST", new String[][]{{"right", "LS", ":"}});
-	    headRules.put("NAC", new String[][]{{"left", "NN", "NNS", "NML", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "JJP", "FW"}});
+	    headRules.put("NAC", new String[][]{{"left", "NN", "NNS", "NML", "NNP", "NNPS", "NP", "NAC", "EX", "\\$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "JJP", "FW"}});
 	    headRules.put("NX", new String[][]{{"right","NP","NX"}});
 	    //Changed PP search to left -- for conjunction (and consistent with SemanticHeadFinder)
 	    // added JJ as head
 	    headRules.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ", "SYM"}, {"left", "PP"}});
 	    headRules.put("PRN", new String[][]{{"left", "VP", "NP", "PP", "SQ", "S", "SINV", "SBAR", "ADJP", "JJP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
 	    headRules.put("PRT", new String[][]{{"right", "RP"}});
-	    headRules.put("QP", new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "CD", "PDT", "DT", "RB", "NCD", "QP", "JJR", "JJS"}});
+	    headRules.put("QP", new String[][]{{"left", "\\$", "IN", "NNS", "NN", "JJ", "CD", "PDT", "DT", "RB", "NCD", "QP", "JJR", "JJS"}});
 	    // reduced relative clause can be any predicate VP, ADJP, NP, PP.
 	    // For choosing between NP and PP, really need to know which one is temporal to discard it. 
 	    // ADVP?
@@ -108,11 +108,11 @@ public class CollinsHeadFinderModified extends AbstractHeadFinder {
 	    headRules.put("VP", new String[][]{{"left", "TO", "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "VP", "AUX", "AUXG", "ADJP", "JJP", "NN", "NNS", "JJ", "NP", "NNP"}});
 	    headRules.put("WHADJP", new String[][]{{"left", "WRB", "WHADVP", "RB", "JJ", "ADJP", "JJP", "JJR"}});
 	    headRules.put("WHADVP", new String[][]{{"right", "WRB", "WHADVP"}});
-	    headRules.put("WHNP", new String[][]{{"left", "WDT", "WP", "WP$", "WHADJP", "WHPP", "WHNP"}});
+	    headRules.put("WHNP", new String[][]{{"left", "WDT", "WP", "WP\\$", "WHADJP", "WHPP", "WHNP"}});
 	    headRules.put("WHPP", new String[][]{{"right", "IN", "TO", "FW"}});
 	    headRules.put("X", new String[][]{{"right", "S", "VP", "ADJP", "JJP", "NP", "SBAR", "PP", "X"}});
-	    headRules.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NML", "NX", "POS", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "JJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP", "DT", "WDT", "RBR", "ADVP"}});
-	    headRules.put("NML", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "POS", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "JJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP", "DT", "WDT", "RBR", "ADVP"}});
+	    headRules.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NML", "NX", "POS", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "\\$", "ADJP", "JJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP", "DT", "WDT", "RBR", "ADVP"}});
+	    headRules.put("NML", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "POS", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "\\$", "ADJP", "JJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP", "DT", "WDT", "RBR", "ADVP"}});
 	    headRules.put("TYPO", new String[][]{{"left", "NN", "NP", "NML", "NNP", "NNPS", "TO","VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "VP", "ADJP", "JJP", "FRAG"}}); 
 	    headRules.put("EDITED", new String[][] {{"left"}});
 	    headRules.put("XS", new String[][] {{"right", "IN"}});

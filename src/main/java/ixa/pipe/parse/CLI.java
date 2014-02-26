@@ -160,6 +160,13 @@ public class CLI {
         Annotate annotator = new Annotate(lang, headFinder);
         annotator.processTreebankWithHeadWords(inputTree, ext);
       }
+      
+      else if (parsedArguments.get("test") != null) { 
+        File inputTree = new File(parsedArguments.getString("test"));
+        String lang = parsedArguments.getString("lang");
+        Annotate annotator = new Annotate(lang);
+        annotator.parseForTesting(inputTree);
+      }
 
       else {// normal parsing stdin and stdout
 
@@ -195,9 +202,9 @@ public class CLI {
           }
           if (lang.equalsIgnoreCase("es")) {
             if (headFinderOption.equalsIgnoreCase("collins")) {
-              // headFinder = new CollinsHeadFinder();
+              headFinder = new AncoraHeadFinder();
             } else {
-              // headFinder = new EnglishSemanticHeadFinder(true);
+              headFinder = new AncoraHeadFinder();
             }
           }
           // parse with heads
