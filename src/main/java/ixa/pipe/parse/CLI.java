@@ -104,6 +104,7 @@ public class CLI {
         .help(
             "Specify extension of files, e.g. '.txt' or '' for every file, to be processed by the --processTreebankWithHeadWords directory option.\n");
     
+    parser.addArgument("--test").help("Takes a tokenized text of a gold standard Penn Treebank file to process it and test it.\n");
     
     /*
      * Parse the command line arguments
