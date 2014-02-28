@@ -89,7 +89,7 @@ public class EnglishSemanticHeadFinder extends CollinsHeadFinderModified {
 	 
 	  public EnglishSemanticHeadFinder(boolean copular) {
 	    super();
-	    // IMPORTANT: this modify some of the rules of the headRules map in CollinsHeadFinderModified,
+	    // IMPORTANT: this modifies some of the rules of the headRules map in CollinsHeadFinderModified,
 	    // which in turn modifies CollinsHeadFinder
 	    semanticHeadRules();
 	    
@@ -110,9 +110,8 @@ public class EnglishSemanticHeadFinder extends CollinsHeadFinderModified {
 	  
 	  // modifies the CollinsHeadFinderModified rules according to semantic notions
 	  // These rules provided by Stanford parser; adapted to work with Apache OpenNLP parser API
-	  // ragerri: I am doing all this "funny" work because I want to produce "semantic heads" for our 
-	  // coreference system, not only for NP headWord detection but also for sieves such as strict head 
-	  // matching
+	  // ragerri: I want to produce "semantic heads" for our 
+	  // coreference system
 	  
 	  private void semanticHeadRules() { 
 		//  NP: don't want a POS to be the head
