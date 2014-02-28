@@ -20,8 +20,8 @@ import java.io.InputStream;
 import java.util.Date;
 
 /**
- * Class to load the language-dependent resources. Mainly models but also head rules files if 
- * required. Resources are located according to maven project structure: $src/main/resources/
+ * Class to load the language-dependent resources. 
+ * Resources are located according to maven project structure: $src/main/resources/
  * 
  * @author ragerri
  *
@@ -29,7 +29,6 @@ import java.util.Date;
 public class Models {
 
   private InputStream parseModel;
-  private InputStream headsFile; 
   
   public InputStream getParseModel(String cmdOption) {
     long lStartTime = new Date().getTime();
@@ -47,17 +46,5 @@ public class Models {
     System.err.println("Parse model loaded in: " + difference + " seconds ... [DONE]");
     return parseModel;
   }
-  
-  public InputStream getHeadRulesFile(String cmdOption) {
-
-	    if (cmdOption.equals("en")) {
-	      headsFile = getClass().getResourceAsStream("/en-head-rules");
-	    }
-
-	    if (cmdOption.equals("es")) {
-	      headsFile = getClass().getResourceAsStream("/es-head-rules");
-	    }
-	    return headsFile;
-	  }
 
 }

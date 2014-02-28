@@ -32,7 +32,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
   private static final boolean DEBUG = false;
   protected Map<String, String[][]> headRules;
   protected final String headMark = "=H";
-  protected Set<String> punctSet = new HashSet<String>(Arrays.asList(".",",","``","''",":"));
+  protected Set<String> punctSet = new HashSet<String>(Arrays.asList(".",",","``","''",":",";"));
 
 
   /**
@@ -261,7 +261,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
     for (int i = 1; i < headRule.length; i++) {
       for (int headIdx = 0; headIdx < children.length; headIdx++) {
         String childCat = children[headIdx].getType();
-        if (headRule[i].matches(childCat)) {
+        if (childCat.matches(headRule[i])) {
           return headIdx;
         }
       }
@@ -273,7 +273,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
     for (int headIdx = 0; headIdx < children.length; headIdx++) {
       String childCat = children[headIdx].getType();
       for (int i = 1; i < headRule.length; i++) {
-        if (headRule[i].matches(childCat)) {
+        if (childCat.matches(headRule[i])) {
           return headIdx;
         }
       }
@@ -286,7 +286,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
       String childCat = children[headIdx].getType();
       boolean found = true;
       for (int i = 1; i < headRule.length; i++) {
-        if (headRule[i].matches(childCat)) {
+        if (childCat.matches(headRule[i])) {
           found = false;
         }
       }
@@ -301,7 +301,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
     for (int i = 1; i < headRule.length; i++) {
       for (int headIdx = children.length - 1; headIdx >= 0; headIdx--) {
         String childCat = children[headIdx].getType();
-        if (headRule[i].matches(childCat)) {
+        if (childCat.matches(headRule[i])) {
           return headIdx;
         }
       }
@@ -314,7 +314,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
     for (int headIdx = children.length - 1; headIdx >= 0; headIdx--) {
       String childCat = children[headIdx].getType();
       for (int i = 1; i < headRule.length; i++) {
-        if (headRule[i].matches(childCat)) {
+        if (childCat.matches(headRule[i])) {
           return headIdx;
         }
       }
@@ -327,7 +327,7 @@ public abstract class AbstractHeadFinder implements HeadFinder {
       String childCat = children[headIdx].getType();
       boolean found = true;
       for (int i = 1; i < headRule.length; i++) {
-        if (headRule[i].matches(childCat)) {
+        if (childCat.matches(headRule[i])) {
           found = false;
         }
       }

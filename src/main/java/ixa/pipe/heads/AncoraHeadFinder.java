@@ -9,36 +9,31 @@ public class AncoraHeadFinder extends AbstractHeadFinder {
     super(categoriesToAvoid);
     
     headRules = new HashMap<String, String[][]>();
-    headRules.put("SN", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "POS", "JJR"}, {"left", "NP"}, {"rightdis", "$", "ADJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}});
-    headRules.put("ADJP", new String[][]{{"left", "NNS", "QP", "NN", "$", "ADVP", "JJ", "VBN", "VBG", "ADJP", "JJR", "NP", "JJS", "DT", "FW", "RBR", "RBS", "SBAR", "RB"}} );
-    headRules.put("ADVP", new String[][]{{"right", "RB", "RBR", "RBS", "FW", "ADVP", "TO", "CD", "JJR", "JJ", "IN", "NP", "JJS", "NN"}});
-    headRules.put("CONJP", new String[][]{{"right", "CC", "RB", "IN"}});
-    headRules.put("FRAG", new String[][]{{"right"}});
-    headRules.put("INTJ", new String[][]{{"left"}});
-    headRules.put("LST", new String[][]{{"right", "LS", ":"}});
-    headRules.put("NAC", new String[][]{{"left", "NN", "NNS", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "FW"}});
-    headRules.put("NX", new String[][]{{"left"}}); 
-    headRules.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW"}});
-    headRules.put("PRN", new String[][]{{"left"}});
-    headRules.put("PRT", new String[][]{{"right", "RP"}});
-    headRules.put("QP", new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "RB", "DT", "CD", "NCD", "QP", "JJR", "JJS"}});
-    headRules.put("RRC", new String[][]{{"right", "VP", "NP", "ADVP", "ADJP", "PP"}});
-    headRules.put("S", new String[][]{{"left", "TO", "IN", "VP", "S", "SBAR", "ADJP", "UCP", "NP"}});
-    headRules.put("SBAR", new String[][]{{"left", "WHNP", "WHPP", "WHADVP", "WHADJP", "IN", "DT", "S", "SQ", "SINV", "SBAR", "FRAG"}});
-    headRules.put("SBARQ", new String[][]{{"left", "SQ", "S", "SINV", "SBARQ", "FRAG"}});
-    headRules.put("SINV", new String[][]{{"left", "VBZ", "VBD", "VBP", "VB", "MD", "VP", "S", "SINV", "ADJP", "NP"}});
-    headRules.put("SQ", new String[][]{{"left", "VBZ", "VBD", "VBP", "VB", "MD", "VP", "SQ"}});
-    headRules.put("UCP", new String[][]{{"right"}});
-    headRules.put("VP", new String[][]{{"left", "TO", "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "AUX", "AUXG", "VP", "ADJP", "NN", "NNS", "NP"}});
-    headRules.put("WHADJP", new String[][]{{"left", "CC", "WRB", "JJ", "ADJP"}});
-    headRules.put("WHADVP", new String[][]{{"right", "CC", "WRB"}});
-    headRules.put("WHNP", new String[][]{{"left", "WDT", "WP", "WP$", "WHADJP", "WHPP", "WHNP"}});
-    headRules.put("WHPP", new String[][]{{"right", "IN", "TO", "FW"}});
+    headRules.put("SN", new String[][]{{"rightdis", "NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM", "AQA.*","AQC.*"}, {"left", "SN","GRUP\\.NOM"}, {"rightdis", "\\$","SA", "S\\.A\\.","GRUP\\.A"}, {"right", "Z.*"}, {"rightdis", "AQ0.*", "AQ[AC].*","AO.*","RG","RN","GRUP\\.NOM"}});
+    headRules.put("GRUP\\.NOM", new String[][]{{"rightdis", "NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM", "AQA.*","AQC.*"}, {"left", "GRUP\\.NOM"}, {"rightdis", "\\$","SA", "S\\.A\\.","GRUP\\.A"}, {"right", "Z.*"}, {"rightdis", "AQ0.*", "AQ[AC].*","AO.*","RG","RN","GRUP\\.NOM"}});
+    headRules.put("SENTENCE", new String[][] {{"left","SP[CS].*","CS.*","GRUP\\.VERB","S","SA","COORD","GRUP\\.NOM","SN","S"}});
+    headRules.put("S", new String[][]{{"left","SP[CS].*","CS.*","GRUP\\.VERB","S","SA","COORD","GRUP\\.NOM","SN"}});
+    headRules.put("SA", new String[][]{{"left", "NC.*P.*", "GRUP\\.NOM","\\$","NC.*S.*","SADV","GRUP\\.ADV","AQA.*", "AQC.*","V[MAS]P.*", "V[MAS]G.*", "SA","S\\.A\\.","GRUP\\.A","AQS.*", "SN", "GRUP\\.NOM", "D.*", "S", "RG", "RN"}} );
+    headRules.put("S\\.A\\.", new String[][]{{"left", "NC.*P.*", "GRUP\\.NOM","\\$","NC.*S.*","SADV","GRUP\\.ADV","AQA.*", "AQC.*","V[MAS]P.*", "V[MAS]G.*", "S\\.A\\.","GRUP\\.A","AQS.*", "SN", "GRUP\\.NOM", "D.*", "S", "RG", "RN"}} );
+    headRules.put("SADV", new String[][]{{"right","S","RG", "RN", "SADV", "GRUP\\.ADV", "PREP", "SP[CS].*", "Z.*", "AQA.*", "AQC.*", "A.*", "CS.*", "SN", "GRUP\\.NOM", "AQS.*", "NC.*S.*"}});
+    headRules.put("SP", new String[][]{{"right", "SP[CS].*", "CS.*", "V[MAS]G.*", "V[MAS]P.*"}});
+    headRules.put("GRUP\\.A",new String[][]{{"left","NC.*P.*", "GRUP\\.NOM","\\$","NC.*S.*","SADV","GRUP\\.ADV","AQA.*", "AQC.*","V[MAS]P.*", "V[MAS]G.*", "GRUP\\.A","AQS.*", "SN", "GRUP\\.NOM", "D.*", "S", "RG", "RN"}} );
+    headRules.put("GRUP\\.ADV",new String[][]{{"right", "RG", "RN", "GRUP\\.ADV", "PREP", "SP.*", "Z.*", "AQA.*", "AQC.*", "A.*", "CS.*", "SN", "GRUP\\.NOM", "AQS.*", "NC.*S.*"}});
+    headRules.put("GRUP\\.VERB", new String[][]{{"left", "SP[CS].*", "V[MAS].*[IS].*", "V[MAS]P.*", "V.*C.*", "V[MAS]IP3S.*", "V.*", "V[MAS]G.*", "V[MAS]IP[12]S.*","GRUP\\.VERB", "SA","S\\.A\\.","GRUP\\.A", "NC.*S.*", "NC.*P.*", "GRUP\\.NOM","SN","S"}});
+    headRules.put("INFINITIU", new String[][]{{"left", "VMN.*","V[MAS]N.*","V.*"}});
+    headRules.put("GERUNDI", new String[][]{{"left", "VMG.*","V[MAS]G.*","V.*"}});
+    headRules.put("PARTICIPI", new String[][]{{"left", "VMP.*","V[MAS]P.*","V.*"}});
+    headRules.put("MORFEMA\\.PRONOMINAL", new String[][]{{"left", "P.*","SN.*","GRUP\\.NOM.*","GRUP\\.VERB"}});
+    headRules.put("MORFEMA\\.VERBAL", new String[][]{{"left", "GRUP\\.VERB","P.*","SN.*","GRUP\\.NOM.*","S"}});
+    headRules.put("COORD", new String[][]{{"right"}});
+    headRules.put("CONJ", new String[][]{{"right", "CC.*", "RB", "RN","SP[CS].*","CS"}});
+    headRules.put("INC",new String[][]{{"left","S","SN","GRUP\\.NOM","GRUP\\.VERB","SADV","GRUP.ADV","SA","S\\.A\\.","GRUP\\.A", "SP[CS].*","CS","D.*"}});
+    headRules.put("INTERJECCIÓ", new String[][]{{"left"}});
+    headRules.put("NEG", new String[][]{{"left","RN"}}); 
+    headRules.put("PREP", new String[][]{{"left","SP[CS].*","CS"}});
+    headRules.put("RELATIU", new String[][]{{"left", "P.*","SN","GRUP\\.NOM","S", "GRUP\\.VERB"}}); 
+    headRules.put("SPEC", new String[][]{{"left"}});
     headRules.put("X", new String[][]{{"right"}});
-    // these last three added by Stanford parser
-    headRules.put("TYPO", new String[][] {{"left"}});
-    headRules.put("EDITED", new String[][] {{"left"}});
-    headRules.put("XS", new String[][] {{"right", "IN"}});
   }
     
   /* (non-Javadoc)
@@ -52,7 +47,7 @@ public class AncoraHeadFinder extends AbstractHeadFinder {
   protected int correctFoundHeads(int headIndex, Parse[] children) {
     if (headIndex >= 2) {
       String prevLab = children[headIndex - 1].getType();
-      if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
+      if (prevLab.equals("CC") || prevLab.equals("COORD")) {
         int newHeadIndex = headIndex - 2;
         Parse t = children[newHeadIndex];
         while (newHeadIndex >= 0 && (t.getChildCount() ==  1 && t.getChildren()[0].getChildCount() == 0) &&

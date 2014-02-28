@@ -1,6 +1,0 @@
-- escape nonterminals in headfinders for using match in abstract headfinder, 
-e.g., $
-
-- ratnapharki, p. 70: pos, constituents, bracketing info only used for training and 
-  testing.
-- collins, p. 205, none nodes removed
