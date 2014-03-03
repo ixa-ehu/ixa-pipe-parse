@@ -1,20 +1,3 @@
-/*
- * Copyright 2013 Rodrigo Agerri
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
-
-
 package ixa.pipe.heads;
 
 /**
@@ -49,8 +32,7 @@ package ixa.pipe.heads;
 * "There is a man" <br/>
 * "is" will be he head and "man" will be the head of "a man". 
 * </quote>
-* 
-* @author ragerri
+*
 */
 
 import java.util.Arrays;
@@ -236,10 +218,6 @@ public class EnglishSemanticHeadFinder extends CollinsHeadFinderModified {
 	   * @param parent the parse parent of the parse tree
 	   * @return The parse tree that is the head
 	   */
-	  //TODO Lot of hard coding here. As ixa-pipe-parse is multilingual,
-	  //find out if we can remove hard-coded categories for code reuse for 
-	  //Semantic Head Finders for other languages. Or maybe the rules
-	  //will be so different that it is not worth the effort
 	  @Override
 	  protected Parse getNonTrivialHead(Parse parse, Parse parent) {
 	    String nonTerminal = parse.getType().replace(headMark, "");
@@ -579,36 +557,34 @@ public class EnglishSemanticHeadFinder extends CollinsHeadFinderModified {
 
 
 	  /** This looks to see whether any of the children is a preterminal headed by a word
-	   *  which is within the set verbalSet (which in practice is either
-	   *  auxiliary or copula verbs).  It only returns true if it's a preterminal head, since
-	   *  you don't want to pick things up in non terminal children. 
-	   *
-	   * @param children The child trees
-	   * @param verbalSet The set of words
-	   * @param allowTagOnlyMatch If true, it's sufficient to match on an unambiguous auxiliary tag.
-	   *                          Make true iff verbalSet is "all auxiliaries"
-	   * @return Returns true if one of the child trees is a preterminal verb headed
-	   *      by a word in verbalSet
-	   */
-	  private boolean hasVerbalAuxiliary(Parse[] children, Set<String> verbalSet, boolean allowTagOnlyMatch) {
-	    if (DEBUG) {
-	      System.err.println("Checking for verbal auxiliary");
-	    }
-	    for (Parse child : children) {
-	      if (DEBUG) {
-	        System.err.println("  checking in " + child);
-	      }
-	      if (isVerbalAuxiliary(child, verbalSet, allowTagOnlyMatch)) {
-	        return true;
-	      }
-	    }
-	    if (DEBUG) {
-	      System.err.println("hasVerbalAuxiliary returns false");
-	    }
-	    return false;
-	  }
-
-
+       *  which is within the set verbalSet (which in practice is either
+       *  auxiliary or copula verbs).  It only returns true if it's a preterminal head, since
+       *  you don't want to pick things up in non terminal children. 
+       *
+       * @param children The child trees
+       * @param verbalSet The set of words
+       * @param allowTagOnlyMatch If true, it's sufficient to match on an unambiguous auxiliary tag.
+       *                          Make true iff verbalSet is "all auxiliaries"
+       * @return Returns true if one of the child trees is a preterminal verb headed
+       *      by a word in verbalSet
+       */
+      private boolean hasVerbalAuxiliary(Parse[] children, Set<String> verbalSet, boolean allowTagOnlyMatch) {
+        if (DEBUG) {
+          System.err.println("Checking for verbal auxiliary");
+        }
+        for (Parse child : children) {
+          if (DEBUG) {
+            System.err.println("  checking in " + child);
+          }
+          if (isVerbalAuxiliary(child, verbalSet, allowTagOnlyMatch)) {
+            return true;
+          }
+        }
+        if (DEBUG) {
+          System.err.println("hasVerbalAuxiliary returns false");
+        }
+        return false;
+      }
 
 }
 

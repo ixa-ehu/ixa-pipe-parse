@@ -18,6 +18,7 @@ package ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
 import ixa.pipe.heads.AncoraHeadFinder;
+import ixa.pipe.heads.AncoraSemanticHeadFinder;
 import ixa.pipe.heads.CollinsHeadFinder;
 import ixa.pipe.heads.EnglishSemanticHeadFinder;
 import ixa.pipe.heads.HeadFinder;
@@ -205,7 +206,7 @@ public class CLI {
             if (headFinderOption.equalsIgnoreCase("collins")) {
               headFinder = new AncoraHeadFinder();
             } else {
-              headFinder = new AncoraHeadFinder();
+              headFinder = new AncoraSemanticHeadFinder();
             }
           }
           // parse with heads
