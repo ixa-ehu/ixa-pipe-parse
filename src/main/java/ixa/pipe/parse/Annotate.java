@@ -184,6 +184,7 @@ public class Annotate {
         parsingDoc.append("\n");
         }
       File outfile = new File(FilenameUtils.removeExtension(inputText.getPath())+ ".test");
+      System.err.println("Writing test parse file to " + outfile);
       FileUtils.writeStringToFile(outfile, parsingDoc.toString(),"UTF-8");  
       }  
     else { 
