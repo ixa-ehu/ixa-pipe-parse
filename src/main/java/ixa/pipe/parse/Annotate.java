@@ -37,6 +37,7 @@ import opennlp.tools.parser.Parse;
  * with headWords marked. It also loads the right model for each language.
  * 
  * @author ragerri
+ * @version 2014-02-03
  * 
  */
 public class Annotate {
