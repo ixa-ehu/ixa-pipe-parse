@@ -41,10 +41,17 @@ import org.jdom2.JDOMException;
 /**
  * ixa-pipe-parse: Constituent Parsing:
  * 
- * - Using Apache OpenNLP Machine Learning API for training and deploying
- * models. - Providing extra support for Collins and Stanford Semantic Head
+ * <li>
+ * <ol> Using Apache OpenNLP Machine Learning API for training and deploying
+ * models.
+ * <ol> Providing extra support for Collins and Stanford Semantic Head
  * Finders, the latter useful for coreference resolution and dependency
- * conversion. - Outputs KAF and penn treebank formats.
+ * conversion.
+ * <ol> It takes the tokens of a gold parse file for evaluation (e.g., sec 
+ * 23 of Penn Treebank) and produces the test parse file ready to be evaluated
+ * with EVALB. 
+ * <ol> Outputs KAF and penn treebank formats.
+ * </li>
  * 
  * @author ragerri
  * @version 1.0
@@ -98,14 +105,19 @@ public class CLI {
     parser
         .addArgument("--processTreebankWithHeadWords")
         .help(
-            "Add headwords to a file containing one syntactic tree in Penn Treebank format; this option requires --lang, --heads and --nokaf options specified.\n");
+            "Takes a file as argument containing a parse tree in penn treebank " +
+            "(one line per sentence) format; " +
+            "this option requires --lang, --heads and --nokaf options.\n");
 
     parser
         .addArgument("--extension")
         .help(
-            "Specify extension of files, e.g. '.txt' or '' for every file, to be processed by the --processTreebankWithHeadWords directory option.\n");
+            "Specify extension of files, e.g. '.txt' or '' for every file, " +
+            "to be processed by the --processTreebankWithHeadWords directory option.\n");
     
-    parser.addArgument("--test").help("Takes a tokenized text of a gold standard Penn Treebank file to process it and test it.\n");
+    parser.addArgument("--test").help("Takes a file as argument containing the tokenized text " +
+    		"of a gold standard Penn Treebank file to process it; It produces a test file for its " +
+    		"parseval evaluation with EVALB.\n");
     
     /*
      * Parse the command line arguments

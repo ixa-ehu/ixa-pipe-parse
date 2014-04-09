@@ -7,6 +7,12 @@ import java.util.Set;
 
 import opennlp.tools.parser.Parse;
 
+/**
+ * Extends the AncoraHeadFinder by adding specific rules based on lexical information. 
+ * 
+ * @author ragerri
+ * @version 2014-03-12
+ */
 public class AncoraSemanticHeadFinder extends AncoraHeadFinder {
 
 

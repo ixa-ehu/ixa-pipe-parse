@@ -4,6 +4,13 @@ import java.util.HashMap;
 
 import opennlp.tools.parser.Parse;
 
+/**
+ * Defines head finding rules for the Ancora corpus. 
+ * 
+ * @author ragerri
+ * @version 2014-03-09
+ */
+
 public class AncoraHeadFinder extends AbstractHeadFinder {
   public AncoraHeadFinder(String... categoriesToAvoid) {
     super(categoriesToAvoid);
