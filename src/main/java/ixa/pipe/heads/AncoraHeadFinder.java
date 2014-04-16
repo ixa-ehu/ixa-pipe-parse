@@ -16,8 +16,8 @@ public class AncoraHeadFinder extends AbstractHeadFinder {
     super(categoriesToAvoid);
     
     headRules = new HashMap<String, String[][]>();
-    headRules.put("SN", new String[][]{{"rightdis", "NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM", "AQA.*","AQC.*","GRUP\\.A","S\\.A"}, {"left", "SN","GRUP\\.NOM"}, {"rightdis", "\\$","SA", "S\\.A","GRUP\\.A"}, {"right", "Z.*"}, {"rightdis", "AQ0.*", "AQ[AC].*","AO.*","GRUP\\.A","S\\.A","RG","RN","GRUP\\.NOM"}});
-    headRules.put("GRUP.NOM", new String[][]{{"rightdis", "NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM", "AQA.*","AQC.*","GRUP\\.A","S\\.A"}, {"left", "GRUP\\.NOM"}, {"rightdis", "\\$","SA", "S\\.A.","GRUP\\.A"}, {"right", "Z.*"}, {"rightdis", "AQ0.*", "AQ[AC].*","AO.*","GRUP\\.A","S\\.A","RG","RN","GRUP\\.NOM"}});
+    headRules.put("SN", new String[][]{{"rightdis","AQA.*","AQC.*","GRUP\\.A","S\\.A","NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM"}, {"left", "SN","GRUP\\.NOM"}, {"rightdis", "\\$","GRUP\\.A","S\\.A","SA"}, {"right", "Z.*"}, {"rightdis", "AQ0.*","AQ[AC].*","AO.*","GRUP\\.A","S\\.A","RG","RN","GRUP\\.NOM"}});
+    headRules.put("GRUP.NOM", new String[][]{{"rightdis","AQA.*","AQC.*","GRUP\\.A","S\\.A","NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM"}, {"left", "SN","GRUP\\.NOM"}, {"rightdis", "\\$","GRUP\\.A","S\\.A","SA"}, {"right", "Z.*"}, {"rightdis", "AQ0.*","AQ[AC].*","AO.*","GRUP\\.A","S\\.A","RG","RN","GRUP\\.NOM"}});
     headRules.put("SENTENCE", new String[][] {{"left","PREP","SP[CS].*","CS.*","GRUP\\.VERB","S","SA","COORD","CONJ","GRUP\\.NOM","SN","S"}});
     headRules.put("S", new String[][]{{"left","PREP","SP[CS].*","COORD","CONJ","CS.*","GRUP\\.VERB","S","SA","COORD","GRUP\\.NOM","SN"}});
     headRules.put("SA", new String[][]{{"left", "NC.*P.*", "GRUP\\.NOM","\\$","NC.*S.*","SADV","GRUP\\.ADV","AQA.*", "AQC.*","V[MAS]P.*", "V[MAS]G.*", "SA","S\\.A","GRUP\\.A","AQS.*", "SN", "GRUP\\.NOM", "D.*", "S", "RG", "RN"}} );
@@ -26,7 +26,7 @@ public class AncoraHeadFinder extends AbstractHeadFinder {
     headRules.put("SP", new String[][]{{"right", "SP[CS].*", "PREP", "CS.*", "CONJ", "V[MAS]G.*", "V[MAS]P.*"}});
     headRules.put("GRUP.A",new String[][]{{"left","NC.*P.*", "GRUP\\.NOM","\\$","NC.*S.*","SADV","GRUP\\.ADV","AQA.*", "AQC.*","V[MAS]P.*", "V[MAS]G.*", "GRUP\\.A","AQS.*", "SN", "GRUP\\.NOM", "D.*", "S", "RG", "RN"}} );
     headRules.put("GRUP.ADV",new String[][]{{"right", "RG", "RN", "GRUP\\.ADV", "PREP", "SP.*", "Z.*", "AQA.*", "AQC.*", "GRUP\\.A","S\\.A","CS.*", "CONJ","SN", "GRUP\\.NOM", "AQS.*", "NC.*S.*"}});
-    headRules.put("GRUP.VERB", new String[][]{{"left", "PREP","SP[CS].*", "V[MAS].*[IS].*", "V[MAS]P.*", "V.*C.*", "V[MAS]IP3S.*", "V.*", "V[MAS]G.*", "V[MAS]IP[12]S.*","GRUP\\.VERB", "SA","S\\.A","GRUP\\.A", "NC.*S.*", "NC.*P.*", "GRUP\\.NOM","SN","S"}});
+    headRules.put("GRUP.VERB", new String[][]{{"left","INFINITIU","GERUNDI","PARTICIPI","PREP","SP[CS].*", "V[MAS].*[IS].*", "V[MAS]P.*", "V.*C.*", "V[MAS]IP3S.*", "V.*", "V[MAS]G.*", "V[MAS]IP[12]S.*","GRUP\\.VERB", "SA","S\\.A","GRUP\\.A", "NC.*S.*", "NC.*P.*", "GRUP\\.NOM","SN","S"}});
     headRules.put("INFINITIU", new String[][]{{"left", "VMN.*","V[MAS]N.*","V.*"}});
     headRules.put("GERUNDI", new String[][]{{"left", "VMG.*","V[MAS]G.*","V.*"}});
     headRules.put("PARTICIPI", new String[][]{{"left", "VMP.*","V[MAS]P.*","V.*"}});
