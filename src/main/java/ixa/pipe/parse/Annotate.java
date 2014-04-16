@@ -134,14 +134,13 @@ public class Annotate {
    * @return KAF <constituents> elements
    * @throws IOException
    */
-  public String parseToKAF(KAFDocument kaf) throws IOException {
+  public void parseToKAF(KAFDocument kaf) throws IOException {
     StringBuffer parsingDoc = getParse(kaf);
     try {
       kaf.addConstituencyFromParentheses(parsingDoc.toString());
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return kaf.toString();
   }
 
   /**

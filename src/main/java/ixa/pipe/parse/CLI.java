@@ -27,7 +27,9 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -35,6 +37,8 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
+import net.sourceforge.argparse4j.inf.Subparsers;
 
 import org.jdom2.JDOMException;
 
@@ -42,16 +46,16 @@ import org.jdom2.JDOMException;
  * ixa-pipe-parse: Constituent Parsing:
  * 
  * <li>
- * <ol> Using Apache OpenNLP Machine Learning API for training and deploying
- * models.
- * <ol> Providing extra support for Collins and Stanford Semantic Head
- * Finders, the latter useful for coreference resolution and dependency
- * conversion.
- * <ol> It takes the tokens of a gold parse file for evaluation (e.g., sec 
- * 23 of Penn Treebank) and produces the test parse file ready to be evaluated
- * with EVALB. 
- * <ol> Outputs KAF and penn treebank formats.
- * </li>
+ * <ol>
+ * Using Apache OpenNLP Machine Learning API for training and deploying models.
+ * <ol>
+ * Providing extra support for Collins and Stanford Semantic Head Finders, the
+ * latter useful for coreference resolution and dependency conversion.
+ * <ol>
+ * It takes the tokens of a gold parse file for evaluation (e.g., sec 23 of Penn
+ * Treebank) and produces the test parse file ready to be evaluated with EVALB.
+ * <ol>
+ * Outputs KAF and penn treebank formats.</li>
  * 
  * @author ragerri
  * @version 1.0
@@ -60,84 +64,147 @@ import org.jdom2.JDOMException;
 
 public class CLI {
 
+  Namespace parsedArguments = null;
+
+  // create Argument Parser
+  ArgumentParser argParser = ArgumentParsers.newArgumentParser(
+      "ixa-pipe-parse-1.0.jar").description(
+      "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
+          + "developed by IXA NLP Group.\n");
   /**
-   * 
-   * BufferedReader (from standard input) and BufferedWriter are opened. The
-   * module takes KAF and reads the header, and the text elements and uses
-   * Annotate class to provide constituent parsing of sentences, which are
-   * provided via standard output.
-   * 
-   * @param args
-   * @throws IOException
-   * @throws JDOMException
+   * Sub parser instance.
    */
+  private Subparsers subParsers = argParser.addSubparsers().help(
+      "sub-command help");
+  /**
+   * The parser that manages the tagging sub-command.
+   */
+  private Subparser annotateParser;
+  /**
+   * The parser that manages the training sub-command.
+   */
+  private Subparser trainParser;
+  /**
+   * The parser that manages the evaluation sub-command.
+   */
+  private Subparser evalParser;
+
+  /**
+   * Construct a CLI object with the three sub-parsers to manage the command
+   * line parameters.
+   */
+  public CLI() {
+    annotateParser = subParsers.addParser("parse").help("Parsing CLI");
+    loadAnnotateParameters();
+    trainParser = subParsers.addParser("train").help("Training CLI");
+    loadTrainingParameters();
+    evalParser = subParsers.addParser("eval").help("Evaluation CLI");
+    loadEvalParameters();
+  }
 
   public static void main(String[] args) throws IOException, JDOMException {
 
-    Namespace parsedArguments = null;
+    CLI cmdLine = new CLI();
+    cmdLine.parseCLI(args);
+  }
 
-    // create Argument Parser
-    ArgumentParser parser = ArgumentParsers.newArgumentParser(
-        "ixa-pipe-parse-1.0.jar").description(
-        "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
-            + "developed by IXA NLP Group.\n");
-
-    parser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
-        .help("Do not print parse in KAF format, but plain text.\n");
-    parser
-        .addArgument("-o", "--outputFormat")
-        .choices("penn", "oneline")
-        .setDefault("oneline")
-        .required(false)
-        .help(
-            "Choose between Penn style or oneline LISP style tree output; this option only works if '--nokaf' is also on.\n");
-
-    parser
-        .addArgument("-g", "--heads")
-        .choices("collins", "sem")
-        .required(false)
-        .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
-
-    // specify language
-    parser.addArgument("-l", "--lang").choices("en", "es").required(false)
-        .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
-
-    parser
-        .addArgument("--processTreebankWithHeadWords")
-        .help(
-            "Takes a file as argument containing a parse tree in penn treebank " +
-            "(one line per sentence) format; " +
-            "this option requires --lang, --heads and --nokaf options.\n");
-
-    parser
-        .addArgument("--extension")
-        .help(
-            "Specify extension of files, e.g. '.txt' or '' for every file, " +
-            "to be processed by the --processTreebankWithHeadWords directory option.\n");
-    
-    parser.addArgument("--test").help("Takes a file as argument containing the tokenized text " +
-    		"of a gold standard Penn Treebank file to process it; It produces a test file for its " +
-    		"parseval evaluation with EVALB.\n");
-    
-    /*
-     * Parse the command line arguments
-     */
-
-    // catch errors and print help
+  /**
+   * Parse the command interface parameters with the argParser.
+   * 
+   * @param args
+   *          the arguments passed through the CLI
+   * @throws IOException
+   *           exception if problems with the incoming data
+   */
+  public final void parseCLI(final String[] args) throws IOException {
     try {
-      parsedArguments = parser.parseArgs(args);
+      parsedArguments = argParser.parseArgs(args);
       System.err.println("CLI options: " + parsedArguments);
+      if (args[0].equals("parse")) {
+        annotate(System.in, System.out);
+      } else if (args[0].equals("eval")) {
+        eval();
+      } else if (args[0].equals("train")) {
+        train();
+      }
     } catch (ArgumentParserException e) {
-      parser.handleError(e);
+      argParser.handleError(e);
       System.out
-          .println("Run java -jar target/ixa-pipe-parse-1.0.jar -help for details");
+          .println("Run java -jar target/ixa-pipe-parse-1.0.jar (parse|train|eval) -help for details");
       System.exit(1);
     }
+  }
 
-    /*
-     * Load headFinder parameters
-     */
+  public final void annotate(final InputStream inputStream,
+      final OutputStream outputStream) throws IOException {
+    String headFinderOption;
+    if (parsedArguments.get("heads") == null) {
+      headFinderOption = "";
+    } else {
+      headFinderOption = parsedArguments.getString("heads");
+    }
+    HeadFinder headFinder = null;
+    BufferedReader breader = new BufferedReader(new InputStreamReader(
+        inputStream, "UTF-8"));
+    BufferedWriter bwriter = new BufferedWriter(new OutputStreamWriter(
+        outputStream, "UTF-8"));
+    // read KAF document from inputstream
+    KAFDocument kaf = KAFDocument.createFromStream(breader);
+    String lang;
+    if (parsedArguments.get("lang") == null) {
+      lang = kaf.getLang();
+    } else {
+      lang = parsedArguments.getString("lang");
+    }
+    KAFDocument.LinguisticProcessor newLp =
+        kaf.addLinguisticProcessor("constituency","ixa-pipe-parse-" + lang,"1.0");
+    if (!headFinderOption.isEmpty()) {
+      if (lang.equalsIgnoreCase("en")) {
 
+        if (headFinderOption.equalsIgnoreCase("collins")) {
+          headFinder = new CollinsHeadFinder();
+        } else {
+          headFinder = new EnglishSemanticHeadFinder();
+        }
+      }
+      if (lang.equalsIgnoreCase("es")) {
+        if (headFinderOption.equalsIgnoreCase("collins")) {
+          headFinder = new AncoraHeadFinder();
+        } else {
+          headFinder = new AncoraSemanticHeadFinder();
+        }
+      }
+      // parse with heads
+      newLp.setBeginTimestamp();
+      Annotate annotator = new Annotate(lang, headFinder);
+      if (parsedArguments.getBoolean("nokaf")) {
+        annotator.parseToKAF(kaf);
+        newLp.setEndTimestamp();
+        bwriter.write(kaf.toString());
+      } else {
+        bwriter.write(annotator.parse(kaf));
+      }
+    }
+    // parse without heads
+    else {
+      newLp.setBeginTimestamp();
+      Annotate annotator = new Annotate(lang);
+      if (parsedArguments.getBoolean("nokaf")) {
+        annotator.parseToKAF(kaf);
+        newLp.setEndTimestamp();
+        bwriter.write(kaf.toString());
+      } else {
+        bwriter.write(annotator.parse(kaf));
+      }
+    }
+    bwriter.close();
+  }
+
+  public final void train() {
+    System.err.println("Not yet ready!");
+  }
+
+  public final void eval() throws IOException {
     String headFinderOption;
     if (parsedArguments.get("heads") == null) {
       headFinderOption = "";
@@ -146,103 +213,84 @@ public class CLI {
     }
     HeadFinder headFinder = null;
 
-    try {
+    // special option to process treebank files adding headword marks
+    if (parsedArguments.getString("processTreebankWithHeadWords") != null) {
+      File inputTree = new File(
+          parsedArguments.getString("processTreebankWithHeadWords"));
+      String lang = parsedArguments.getString("lang");
+      String ext = parsedArguments.getString("extension");
+      if (!headFinderOption.isEmpty()) {
+        if (lang.equalsIgnoreCase("en")) {
 
-      // special option to process treebank files adding headword marks
-      if (parsedArguments.getString("processTreebankWithHeadWords") != null) {
-        File inputTree = new File(
-            parsedArguments.getString("processTreebankWithHeadWords"));
-        String lang = parsedArguments.getString("lang");
-        String ext = parsedArguments.getString("extension");
-        if (!headFinderOption.isEmpty()) {
-          if (lang.equalsIgnoreCase("en")) {
-
-            if (headFinderOption.equalsIgnoreCase("collins")) {
-              headFinder = new CollinsHeadFinder();
-            } else {
-              headFinder = new EnglishSemanticHeadFinder();
-            }
-          }
-          if (lang.equalsIgnoreCase("es")) {
-            if (headFinderOption.equalsIgnoreCase("collins")) {
-              headFinder = new AncoraHeadFinder();
-            } else {
-              headFinder = new AncoraHeadFinder();
-            }
-          }
-        }
-        Annotate annotator = new Annotate(lang, headFinder);
-        annotator.processTreebankWithHeadWords(inputTree, ext);
-      }
-      
-      else if (parsedArguments.get("test") != null) { 
-        File inputTree = new File(parsedArguments.getString("test"));
-        String lang = parsedArguments.getString("lang");
-        Annotate annotator = new Annotate(lang);
-        annotator.parseForTesting(inputTree);
-      }
-
-      else {// normal parsing stdin and stdout
-
-        BufferedReader breader = new BufferedReader(new InputStreamReader(
-            System.in, "UTF-8"));
-        BufferedWriter bwriter = new BufferedWriter(new OutputStreamWriter(
-            System.out, "UTF-8"));
-        KAFDocument kaf = KAFDocument.createFromStream(breader);
-
-        // language parameter
-        String lang;
-        if (parsedArguments.get("lang") == null) {
-          lang = kaf.getLang();
-        } else {
-          lang = parsedArguments.getString("lang");
-        }
-        // construct kaf Reader and read from standard input
-        kaf.addLinguisticProcessor("constituency", "ixa-pipe-parse-" + lang,
-            "1.0");
-
-        // choosing HeadFinder: (Collins rules; sem Semantic headFinder
-        // re-implemented from
-        // Stanford CoreNLP. Default: sem (semantic head finder).
-
-        if (!headFinderOption.isEmpty()) {
-          if (lang.equalsIgnoreCase("en")) {
-
-            if (headFinderOption.equalsIgnoreCase("collins")) {
-              headFinder = new CollinsHeadFinder();
-            } else {
-              headFinder = new EnglishSemanticHeadFinder();
-            }
-          }
-          if (lang.equalsIgnoreCase("es")) {
-            if (headFinderOption.equalsIgnoreCase("collins")) {
-              headFinder = new AncoraHeadFinder();
-            } else {
-              headFinder = new AncoraSemanticHeadFinder();
-            }
-          }
-          // parse with heads
-          Annotate annotator = new Annotate(lang, headFinder);
-          if (parsedArguments.getBoolean("nokaf")) {
-            bwriter.write(annotator.parseToKAF(kaf));
+          if (headFinderOption.equalsIgnoreCase("collins")) {
+            headFinder = new CollinsHeadFinder();
           } else {
-            bwriter.write(annotator.parse(kaf));
+            headFinder = new EnglishSemanticHeadFinder();
           }
         }
-        // parse without heads
-        else {
-          Annotate annotator = new Annotate(lang);
-          if (parsedArguments.getBoolean("nokaf")) {
-            bwriter.write(annotator.parseToKAF(kaf));
+        if (lang.equalsIgnoreCase("es")) {
+          if (headFinderOption.equalsIgnoreCase("collins")) {
+            headFinder = new AncoraHeadFinder();
           } else {
-            bwriter.write(annotator.parse(kaf));
+            headFinder = new AncoraHeadFinder();
           }
         }
-        bwriter.close();
       }
-    } catch (IOException e) {
-      e.printStackTrace();
+      Annotate annotator = new Annotate(lang, headFinder);
+      annotator.processTreebankWithHeadWords(inputTree, ext);
     }
 
+    else if (parsedArguments.get("test") != null) {
+      File inputTree = new File(parsedArguments.getString("test"));
+      String lang = parsedArguments.getString("lang");
+      Annotate annotator = new Annotate(lang);
+      annotator.parseForTesting(inputTree);
+    }
   }
+
+  public void loadAnnotateParameters() {
+    annotateParser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
+        .help("Do not print parse in KAF format, but plain text.\n");
+    annotateParser
+        .addArgument("-o", "--outputFormat")
+        .choices("penn", "oneline")
+        .setDefault("oneline")
+        .required(false)
+        .help(
+            "Choose between Penn style or oneline LISP style tree output; this option only works if '--nokaf' is also on.\n");
+    annotateParser
+        .addArgument("-g", "--heads")
+        .choices("collins", "sem")
+        .required(false)
+        .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
+    annotateParser.addArgument("-l", "--lang").choices("en", "es")
+        .required(false)
+        .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
+
+  }
+
+  /**
+   * Create the main parameters available for training parse models.
+   */
+  private void loadTrainingParameters() {
+  }
+
+  private void loadEvalParameters() {
+    evalParser.addArgument("--processTreebankWithHeadWords").help(
+        "Takes a file as argument containing a parse tree in penn treebank "
+            + "(one line per sentence) format; "
+            + "this option requires --lang, --heads and --nokaf options.\n");
+    evalParser
+        .addArgument("--extension")
+        .help(
+            "Specify extension of files, e.g. '.txt' or '' for every file, "
+                + "to be processed by the --processTreebankWithHeadWords directory option.\n");
+    evalParser
+        .addArgument("--test")
+        .help(
+            "Takes a file as argument containing the tokenized text "
+                + "of a gold standard Penn Treebank file to process it; It produces a test file for its "
+                + "parseval evaluation with EVALB.\n");
+  }
+
 }
