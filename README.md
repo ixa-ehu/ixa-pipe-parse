@@ -218,35 +218,35 @@ You should see reference to the MAVEN version you have just installed plus the J
 If you must get the module source code from here do this:
 
 ````shell
-git clone https://github.com/ixa-ehu/ixa-pipe-nerc
+git clone https://github.com/ixa-ehu/ixa-pipe-parse
 ````
 
 ### 4. Download the Resources
 
-You will need to download the trained models and other resources and copy them to ixa-pipe-nerc/src/main/resources/
+You will need to download the trained models and other resources and copy them to ixa-pipe-parse/src/main/resources/
 for the module to work properly:
 
 Download the models and untar the archive into the src/main/resources directory:
 
 ````shell
-cd ixa-pipe-nerc/src/main/resources
-wget http://ixa2.si.ehu.es/ixa-pipes/models/nerc-resources.tgz
-tar xvzf nerc-resources.tgz
+cd ixa-pipe-parse/src/main/resources
+wget http://ixa2.si.ehu.es/ixa-pipes/models/parse-resources.tgz
+tar xvzf parse-resources.tgz
 ````
-The nerc-resources contains the baseline models to which ixa-pipe-nerc backs off if not model is provided as parameter
+The parse-resources contains the baseline models to which ixa-pipe-parse backs off if not model is provided as parameter
 for tagging.
 
 ### 5. Compile
 
 ````shell
-cd ixa-pipe-nerc
+cd ixa-pipe-parse
 mvn clean package
 ````
 
 This step will create a directory called target/ which contains various directories and files.
 Most importantly, there you will find the module executable:
 
-ixa-pipe-nerc-$version.jar
+ixa-pipe-parse-$version.jar
 
 This executable contains every dependency the module needs, so it is completely portable as long
 as you have a JVM 1.7 installed.
