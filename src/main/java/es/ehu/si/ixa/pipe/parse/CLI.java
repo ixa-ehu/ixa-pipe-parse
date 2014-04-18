@@ -298,14 +298,15 @@ public class CLI {
   }
 
   private void loadEvalParameters() {
-    annotateParser.addArgument("-l", "--lang").choices("en", "es")
+    
+    evalParser.addArgument("-l", "--lang").choices("en", "es")
         .required(false)
         .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
     
-    annotateParser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
+    evalParser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
         .help("Do not print parse in KAF format, but plain text.\n");
     
-    annotateParser
+    evalParser
         .addArgument("-g", "--heads")
         .choices("collins", "sem")
         .required(false)
