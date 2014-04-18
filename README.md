@@ -41,18 +41,18 @@ ixa-pipe-parse is distributed under Apache License version 2.0 (see LICENSE.txt 
 
 ixa-pipe-parse provides 3 basic functionalities:
 
-1. **parse**: reads a NAF document containing <wf> and <term> elements and
+1. **parse**: reads a NAF document containing *wf* and *term* elements and
    provides the parsing trees.
 2. **train**: trains new model for English or Spanish with several options
    available (**not yet available**).
 3. **eval**: functionalities to help evaluating a given model with a given test set.
 
-Each of these functionalities are accessible by adding (tag|train|eval) as a
+Each of these functionalities are accessible by adding (parse|train|eval) as a
 subcommand to ixa-pipe-parse-$version.jar. Please read below and check the -help
 parameter: 
 
 ````shell
-java -jar target/ixa-pipe-parse-$version.jar (tag|train|eval) -help
+java -jar target/ixa-pipe-parse-$version.jar (parse|train|eval) -help
 ````
 
 ### Parsing with ixa-pipe-parse
