@@ -298,7 +298,20 @@ public class CLI {
   }
 
   private void loadEvalParameters() {
-
+    annotateParser.addArgument("-l", "--lang").choices("en", "es")
+        .required(false)
+        .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
+    
+    annotateParser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
+        .help("Do not print parse in KAF format, but plain text.\n");
+    
+    annotateParser
+        .addArgument("-g", "--heads")
+        .choices("collins", "sem")
+        .required(false)
+        .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
+    evalParser.addArgument("-m", "--model").required(true).help("Choose model");
+    
     evalParser.addArgument("-f", "--features").choices("baseline")
         .setDefault("baseline").required(false)
         .help("Choose features for evaluation");
