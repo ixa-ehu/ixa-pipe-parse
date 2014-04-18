@@ -65,7 +65,7 @@ cat file.txt | ixa-pipe-tok | ixa-pipe-pos | java -jar $PATH/target/ixa-pipe-par
 
 If you want to know more, please follow reading.
 
-ixa-pipe-parse reads NAF documents (with <wf> and <term> elements) via standard input and outputs NAF
+ixa-pipe-parse reads NAF documents (with *wf* and *term* elements) via standard input and outputs NAF
 through standard output. The NAF format specification is here:
 
 (http://wordpress.let.vupr.nl/naf/)
