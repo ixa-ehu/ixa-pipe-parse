@@ -14,11 +14,10 @@
    limitations under the License.
  */
 
-package ixa.pipe.parse;
+package es.ehu.si.ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
 import ixa.kaflib.WF;
-import ixa.pipe.heads.HeadFinder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +27,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+
+import es.ehu.si.ixa.pipe.parse.heads.HeadFinder;
 
 import opennlp.tools.parser.Parse;
 
@@ -44,7 +45,6 @@ public class Annotate {
 
   private boolean MARKHEADS;
   private ConstituentParsing parser;
-  private Models modelRetriever;
   private HeadFinder headFinder;
 
   /**
@@ -53,10 +53,8 @@ public class Annotate {
    * 
    * @param lang
    */
-  public Annotate(String lang) {
-    modelRetriever = new Models();
-    InputStream parseModel = modelRetriever.getParseModel(lang);
-    parser = new ConstituentParsing(parseModel);
+  public Annotate(String lang, String model) {
+    parser = new ConstituentParsing(lang, model);
     MARKHEADS = false;
   }
 
@@ -68,10 +66,8 @@ public class Annotate {
    * @param lang
    * @param headFinder
    */
-  public Annotate(String lang, HeadFinder headFinder) {
-    modelRetriever = new Models();
-    InputStream parseModel = modelRetriever.getParseModel(lang);
-    parser = new ConstituentParsing(parseModel);
+  public Annotate(String lang, String model, HeadFinder headFinder) {
+    parser = new ConstituentParsing(lang, model);
     this.headFinder = headFinder;
     MARKHEADS = true;
   }

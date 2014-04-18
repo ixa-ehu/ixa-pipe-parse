@@ -14,14 +14,9 @@
    limitations under the License.
  */
 
-package ixa.pipe.parse;
+package es.ehu.si.ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
-import ixa.pipe.heads.AncoraHeadFinder;
-import ixa.pipe.heads.AncoraSemanticHeadFinder;
-import ixa.pipe.heads.CollinsHeadFinder;
-import ixa.pipe.heads.EnglishSemanticHeadFinder;
-import ixa.pipe.heads.HeadFinder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -42,8 +37,16 @@ import net.sourceforge.argparse4j.inf.Subparsers;
 
 import org.jdom2.JDOMException;
 
+import es.ehu.si.ixa.pipe.parse.heads.AncoraHeadFinder;
+import es.ehu.si.ixa.pipe.parse.heads.AncoraSemanticHeadFinder;
+import es.ehu.si.ixa.pipe.parse.heads.CollinsHeadFinder;
+import es.ehu.si.ixa.pipe.parse.heads.EnglishSemanticHeadFinder;
+import es.ehu.si.ixa.pipe.parse.heads.HeadFinder;
+
 /**
- * ixa-pipe-parse: Constituent Parsing:
+ * This is the main class of ixa-pipe-parse a constituent parser based on
+ * Ratnapharki (1999) and trained with the API provided by Apache OpenNLP
+ * project.
  * 
  * <li>
  * <ol>
@@ -55,21 +58,28 @@ import org.jdom2.JDOMException;
  * It takes the tokens of a gold parse file for evaluation (e.g., sec 23 of Penn
  * Treebank) and produces the test parse file ready to be evaluated with EVALB.
  * <ol>
- * Outputs KAF and penn treebank formats.</li>
+ * Outputs NAF and penn treebank formats.</li>
  * 
  * @author ragerri
- * @version 1.0
+ * @version 2014-04-18
  * 
  */
 
 public class CLI {
 
+  /**
+   * Get dynamically the version of ixa-pipe-nerc by looking at the MANIFEST
+   * file.
+   */
+  private final String version = CLI.class.getPackage()
+      .getImplementationVersion();
+
   Namespace parsedArguments = null;
 
   // create Argument Parser
   ArgumentParser argParser = ArgumentParsers.newArgumentParser(
-      "ixa-pipe-parse-1.0.jar").description(
-      "ixa-pipe-parse-1.0 is a multilingual Constituent Parsing module "
+      "ixa-pipe-parse-" + version + ".jar").description(
+      "ixa-pipe-parse is a multilingual Constituent Parsing module "
           + "developed by IXA NLP Group.\n");
   /**
    * Sub parser instance.
@@ -129,8 +139,8 @@ public class CLI {
       }
     } catch (ArgumentParserException e) {
       argParser.handleError(e);
-      System.out
-          .println("Run java -jar target/ixa-pipe-parse-1.0.jar (parse|train|eval) -help for details");
+      System.out.println("Run java -jar target/ixa-pipe-parse-" + version
+          + "(parse|train|eval) -help for details");
       System.exit(1);
     }
   }
@@ -148,7 +158,6 @@ public class CLI {
         inputStream, "UTF-8"));
     BufferedWriter bwriter = new BufferedWriter(new OutputStreamWriter(
         outputStream, "UTF-8"));
-    // read KAF document from inputstream
     KAFDocument kaf = KAFDocument.createFromStream(breader);
     String lang;
     if (parsedArguments.get("lang") == null) {
@@ -156,8 +165,14 @@ public class CLI {
     } else {
       lang = parsedArguments.getString("lang");
     }
-    KAFDocument.LinguisticProcessor newLp =
-        kaf.addLinguisticProcessor("constituency","ixa-pipe-parse-" + lang,"1.0");
+    String model;
+    if (parsedArguments.get("model") == null) {
+      model = "baseline";
+    } else {
+      model = parsedArguments.getString("model");
+    }
+    KAFDocument.LinguisticProcessor newLp = kaf.addLinguisticProcessor(
+        "constituency", "ixa-pipe-parse-" + lang, version);
     if (!headFinderOption.isEmpty()) {
       if (lang.equalsIgnoreCase("en")) {
 
@@ -176,7 +191,7 @@ public class CLI {
       }
       // parse with heads
       newLp.setBeginTimestamp();
-      Annotate annotator = new Annotate(lang, headFinder);
+      Annotate annotator = new Annotate(lang, model, headFinder);
       if (parsedArguments.getBoolean("nokaf")) {
         annotator.parseToKAF(kaf);
         newLp.setEndTimestamp();
@@ -188,7 +203,7 @@ public class CLI {
     // parse without heads
     else {
       newLp.setBeginTimestamp();
-      Annotate annotator = new Annotate(lang);
+      Annotate annotator = new Annotate(lang, model);
       if (parsedArguments.getBoolean("nokaf")) {
         annotator.parseToKAF(kaf);
         newLp.setEndTimestamp();
@@ -212,6 +227,7 @@ public class CLI {
       headFinderOption = parsedArguments.getString("heads");
     }
     HeadFinder headFinder = null;
+    String model = parsedArguments.getString("model");
 
     // special option to process treebank files adding headword marks
     if (parsedArguments.getString("processTreebankWithHeadWords") != null) {
@@ -236,21 +252,35 @@ public class CLI {
           }
         }
       }
-      Annotate annotator = new Annotate(lang, headFinder);
+      Annotate annotator = new Annotate(lang, model, headFinder);
       annotator.processTreebankWithHeadWords(inputTree, ext);
     }
 
     else if (parsedArguments.get("test") != null) {
       File inputTree = new File(parsedArguments.getString("test"));
       String lang = parsedArguments.getString("lang");
-      Annotate annotator = new Annotate(lang);
+      Annotate annotator = new Annotate(lang, model);
       annotator.parseForTesting(inputTree);
     }
   }
 
   public void loadAnnotateParameters() {
+
+    annotateParser.addArgument("-l", "--lang").choices("en", "es")
+        .required(false)
+        .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
+    annotateParser.addArgument("-m", "--model").required(false)
+        .help("Choose model to perform NERC annotation");
     annotateParser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
         .help("Do not print parse in KAF format, but plain text.\n");
+    annotateParser
+        .addArgument("-g", "--heads")
+        .choices("collins", "sem")
+        .required(false)
+        .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
+    annotateParser.addArgument("-f", "--features").choices("baseline")
+        .required(false).setDefault("baseline")
+        .help("Choose features; it defaults to baseline");
     annotateParser
         .addArgument("-o", "--outputFormat")
         .choices("penn", "oneline")
@@ -258,14 +288,6 @@ public class CLI {
         .required(false)
         .help(
             "Choose between Penn style or oneline LISP style tree output; this option only works if '--nokaf' is also on.\n");
-    annotateParser
-        .addArgument("-g", "--heads")
-        .choices("collins", "sem")
-        .required(false)
-        .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
-    annotateParser.addArgument("-l", "--lang").choices("en", "es")
-        .required(false)
-        .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
 
   }
 
@@ -276,6 +298,11 @@ public class CLI {
   }
 
   private void loadEvalParameters() {
+
+    evalParser.addArgument("-f", "--features").choices("baseline")
+        .setDefault("baseline").required(false)
+        .help("Choose features for evaluation");
+
     evalParser.addArgument("--processTreebankWithHeadWords").help(
         "Takes a file as argument containing a parse tree in penn treebank "
             + "(one line per sentence) format; "

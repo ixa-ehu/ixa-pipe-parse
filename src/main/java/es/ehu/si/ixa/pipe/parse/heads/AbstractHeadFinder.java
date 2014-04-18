@@ -15,7 +15,7 @@
  */
 
 
-package ixa.pipe.heads;
+package es.ehu.si.ixa.pipe.parse.heads;
 
 import java.util.ArrayList;
 import java.util.Arrays;

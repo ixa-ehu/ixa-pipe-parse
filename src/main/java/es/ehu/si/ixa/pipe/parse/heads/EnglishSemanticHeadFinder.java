@@ -1,4 +1,4 @@
-package ixa.pipe.heads;
+package es.ehu.si.ixa.pipe.parse.heads;
 
 /**
 * This class is based on the SemanticHeadFinder of Stanford parser. It has been
