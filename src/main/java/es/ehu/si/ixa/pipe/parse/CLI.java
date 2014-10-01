@@ -125,8 +125,9 @@ public class CLI {
    *          the arguments passed through the CLI
    * @throws IOException
    *           exception if problems with the incoming data
+ * @throws JDOMException 
    */
-  public final void parseCLI(final String[] args) throws IOException {
+  public final void parseCLI(final String[] args) throws IOException, JDOMException {
     try {
       parsedArguments = argParser.parseArgs(args);
       System.err.println("CLI options: " + parsedArguments);
@@ -146,7 +147,7 @@ public class CLI {
   }
 
   public final void annotate(final InputStream inputStream,
-      final OutputStream outputStream) throws IOException {
+      final OutputStream outputStream) throws IOException, JDOMException {
     String headFinderOption;
     if (parsedArguments.get("heads") == null) {
       headFinderOption = "";
