@@ -113,7 +113,7 @@ public class ConstituentParsing {
     long lEndTime = new Date().getTime();
     long difference = lEndTime - lStartTime;
     System.err.println("Parse model loaded in: " + difference
-        + " seconds ... [DONE]");
+        + " miliseconds ... [DONE]");
     return parseModelInputStream;
   }
 

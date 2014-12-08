@@ -73,6 +73,7 @@ public class CLI {
    */
   private final String version = CLI.class.getPackage()
       .getImplementationVersion();
+  private final String commit = CLI.class.getPackage().getSpecificationVersion();
 
   Namespace parsedArguments = null;
 
@@ -173,7 +174,7 @@ public class CLI {
       model = parsedArguments.getString("model");
     }
     KAFDocument.LinguisticProcessor newLp = kaf.addLinguisticProcessor(
-        "constituency", "ixa-pipe-parse-" + lang, version);
+        "constituency", "ixa-pipe-parse-" + lang,  version + "-" + commit);
     if (!headFinderOption.isEmpty()) {
       if (lang.equalsIgnoreCase("en")) {
 
