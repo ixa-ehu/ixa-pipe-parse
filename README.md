@@ -20,8 +20,7 @@ ixa-pipe-parse provides:
 
   + Constituent parsing for English trained on the Penn Treebank and for Spanish trained on the
     [Ancora corpus](http://clic.ub.edu/corpus/ancora). 
-  + HeadFinders based on Collins head rules (Michael Collins PhD thesis, 1999) and
-    Stanford's parser Semantic Head Rules. 
+  + HeadFinders based on Collins head rules (Michael Collins PhD thesis, 1999).
 
 For this first release we provide two reasonably fast Maximum Entropy models based on a bottom-up shift-reduce method as 
 described by Adwait Ratnaparkhi (1999). To avoid duplication of efforts, we use the machine learning API 
@@ -92,7 +91,7 @@ There are several options to parse with ixa-pipe-parse:
   format.
 + **heads**: mark constituent headwords. Two methods are available:
   + **collins**: Head rules as defined in Collins's thesis (1999).
-  + **sem**: Semantic head rules defined by the Stanford parser.
+  + **sem**: Semantic head rules.
 
 **Example**: 
 
@@ -118,7 +117,7 @@ options:
   format.
 + **heads**: mark constituent headwords. Two methods are available:
   + **collins**: Head rules as defined in Collins's thesis (1999).
-  + **sem**: Semantic head rules defined by the Stanford parser.
+  + **sem**: Semantic head rules.
 + **processTreebankWithHeadWords**: reads directory/file containing oneline treebank
   format trees and annotate the headwords.
 + **extension**:Specify extension of files, e.g. '.txt' or '' for every file to be
