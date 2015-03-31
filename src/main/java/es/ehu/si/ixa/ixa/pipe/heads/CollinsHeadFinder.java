@@ -68,14 +68,6 @@ public class CollinsHeadFinder implements HeadFinder {
 		}
 	}
 	
-	/**
-	 * Modifies the input Parse tree annotating the heads with 
-	 * '=H' according to every language specific HeadRules class. 
-	 * 
-	 * This function written by Aitor Garcia Pablos (Vicomtech).
-	 * 
-	 * @param parse
-	 */
 	public void printHeads(Parse parse){
 		LinkedList<Parse> nodes=new LinkedList<Parse>();
 		nodes.add(parse);
