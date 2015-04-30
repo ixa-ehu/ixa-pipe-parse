@@ -16,7 +16,7 @@
  */
 
 
-package es.ehu.si.ixa.ixa.pipe.heads;
+package eus.ixa.ixa.pipe.heads;
 
 import opennlp.tools.parser.Parse;
 
