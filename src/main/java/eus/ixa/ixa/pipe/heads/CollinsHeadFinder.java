@@ -23,6 +23,8 @@ public class CollinsHeadFinder implements HeadFinder {
 
   private static Map<String, HeadRules> headRulesMap = new HashMap<String, HeadRules>();
   private HeadRules headRules;
+  private static boolean DEBUG = false;
+  public static final String HEADMARK = "=H";
 
   public CollinsHeadFinder(Properties properties) {
     String lang = properties.getProperty("language");
@@ -65,7 +67,13 @@ public class CollinsHeadFinder implements HeadFinder {
       Parse currentNode = nodes.removeFirst();
       // When a node is here its '=H' annotation has already happened
       // so it '=H' has to be removed to match with the head rules
-      String type = currentNode.getType().replace("=H", "");
+      String type = currentNode.getType().replace(HEADMARK, "");
+      if (currentNode.getType().equals(opennlp.tools.parser.AbstractBottomUpParser.TOP_NODE)) { 
+      currentNode.getChildren()[0].setType(currentNode.getChildren()[0].getType() + HEADMARK);
+      if (DEBUG) {
+        System.err.println(currentNode.toString());
+      }
+    }
       Parse[] children = currentNode.getChildren();
       Parse headChild = null;
       if (children.length > 0) {
@@ -75,10 +83,14 @@ public class CollinsHeadFinder implements HeadFinder {
       // and also add to the queue for the recursive processing
       for (Parse child : currentNode.getChildren()) {
         if (child == headChild) {
-          child.setType(child.getType() + "=H");
+          child.setType(child.getType() + HEADMARK);
         }
+        // add child to last of LinkedList which will 
+        // now take as currentNode the child of this child
         nodes.addLast(child);
       }
     }
   }
+
 }
+
