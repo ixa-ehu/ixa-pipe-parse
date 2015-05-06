@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Properties;
 
 import opennlp.tools.parser.Parse;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.heads.CollinsHeadFinder;
 import eus.ixa.ixa.pipe.heads.HeadFinder;
@@ -144,8 +143,6 @@ public class Annotate {
    return parsingDoc.toString();
  }
 
- 
- 
  /**
   * Takes as input a list of parse strings, one for line, and annotates the
   * headwords
@@ -166,23 +163,22 @@ public class Annotate {
  
  public void parseForTesting(File inputText) throws IOException {
    StringBuffer parsingDoc = new StringBuffer();
-   if (inputText.isFile()) { 
-     List<String> inputTrees = FileUtils.readLines(inputText,"UTF-8");
+   if (inputText.isFile()) {
+     List<String> inputTrees = Files.readLines(inputText, Charsets.UTF_8);
      for (String sentence : inputTrees) { 
        Parse parsedSentence = parser.parse(sentence,1)[0];
        parsedSentence.show(parsingDoc);
        parsingDoc.append("\n");
        }
-     File outfile = new File(FilenameUtils.removeExtension(inputText.getPath())+ ".test");
+     File outfile = new File(Files.getNameWithoutExtension(inputText.getPath()) + ".test");
      System.err.println("Writing test parse file to " + outfile);
-     FileUtils.writeStringToFile(outfile, parsingDoc.toString(),"UTF-8");  
-     }  
+     Files.write(parsingDoc.toString(), outfile, Charsets.UTF_8);  
+     }
    else { 
      System.out.println("Choose a correct file!");
      System.exit(1);
    }
  }
- 
 
  /**
   * Takes a file containing Penn Treebank oneline annotation and annotates the
@@ -196,40 +192,31 @@ public class Annotate {
   *          the extension to look for in the directory
   * @throws IOException
   */
- public void processTreebankWithHeadWords(File dir, String ext)
+ public void processTreebankWithHeadWords(File dir)
      throws IOException {
    // process one file
    if (dir.isFile()) {
-     List<String> inputTrees = FileUtils.readLines(
-         new File(dir.getCanonicalPath()), "UTF-8");
-     File outfile = new File(FilenameUtils.removeExtension(dir.getPath())
+     List<String> inputTrees = Files.readLines(
+         new File(dir.getCanonicalPath()), Charsets.UTF_8);
+     File outfile = new File(Files.getNameWithoutExtension(dir.getPath())
          + ".th");
      String outTree = addHeadWordsToTreebank(inputTrees);
-     FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
-     System.err.println(">> Wrote headWords to Penn Treebank to " + outfile);
+     Files.write(outTree, outfile, Charsets.UTF_8);
+     System.err.println(">> Wrote headWords to " + outfile);
    } else {
      // recursively process directories
      File listFile[] = dir.listFiles();
      if (listFile != null) {
-       if (ext == null) {
-         System.out
-             .println("For recursive directory processing of treebank files specify the extension of the files containing the syntactic trees.");
-         System.exit(1);
-       }
        for (int i = 0; i < listFile.length; i++) {
          if (listFile[i].isDirectory()) {
-           processTreebankWithHeadWords(listFile[i], ext);
+           processTreebankWithHeadWords(listFile[i]);
          } else {
            try {
-             List<String> inputTrees = FileUtils.readLines(new File(
-                 FilenameUtils.removeExtension(listFile[i].getCanonicalPath())
-                     + ext), "UTF-8");
-             File outfile = new File(FilenameUtils.removeExtension(listFile[i]
-                 .getPath()) + ".th");
+             List<String> inputTrees = Files.readLines(new File(Files.getNameWithoutExtension(listFile[i].getCanonicalPath())), Charsets.UTF_8);
+             File outfile = new File(Files.getNameWithoutExtension(listFile[i].getPath()) + ".head");
              String outTree = addHeadWordsToTreebank(inputTrees);
-             FileUtils.writeStringToFile(outfile, outTree, "UTF-8");
-             System.err.println(">> Wrote headWords to "
-                 + outfile);
+             Files.write(outTree, outfile, Charsets.UTF_8);
+             System.err.println(">> Wrote headWords to " + outfile);
            } catch (FileNotFoundException noFile) {
              continue;
            }
