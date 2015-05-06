@@ -142,24 +142,6 @@ public class Annotate {
    StringBuffer parsingDoc = getParse(kaf);
    return parsingDoc.toString();
  }
-
- /**
-  * Takes as input a list of parse strings, one for line, and annotates the
-  * headwords
-  * 
-  * @param inputTrees
-  * @return a list of parse trees with headwords annotated
-  */
- private String addHeadWordsToTreebank(List<String> inputTrees) {
-   StringBuffer parsedDoc = new StringBuffer();
-   for (String parseSent : inputTrees) {
-     Parse parsedSentence = Parse.parseParse(parseSent);
-     headFinder.printHeads(parsedSentence);
-     parsedSentence.show(parsedDoc);
-     parsedDoc.append("\n");
-   }
-   return parsedDoc.toString();
- }
  
  public void parseForTesting(File inputText) throws IOException {
    StringBuffer parsingDoc = new StringBuffer();
@@ -173,8 +155,7 @@ public class Annotate {
      File outfile = new File(Files.getNameWithoutExtension(inputText.getPath()) + ".test");
      System.err.println("Writing test parse file to " + outfile);
      Files.write(parsingDoc.toString(), outfile, Charsets.UTF_8);  
-     }
-   else { 
+     } else { 
      System.out.println("Choose a correct file!");
      System.exit(1);
    }
@@ -224,5 +205,22 @@ public class Annotate {
        }
      }
    }
+ }
+ /**
+  * Takes as input a list of parse strings, one for line, and annotates the
+  * headwords
+  * 
+  * @param inputTrees
+  * @return a list of parse trees with headwords annotated
+  */
+ private String addHeadWordsToTreebank(List<String> inputTrees) {
+   StringBuffer parsedDoc = new StringBuffer();
+   for (String parseSent : inputTrees) {
+     Parse parsedSentence = Parse.parseParse(parseSent);
+     headFinder.printHeads(parsedSentence);
+     parsedSentence.show(parsedDoc);
+     parsedDoc.append("\n");
+   }
+   return parsedDoc.toString();
  }
 }

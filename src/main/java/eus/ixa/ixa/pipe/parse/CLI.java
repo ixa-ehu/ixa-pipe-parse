@@ -21,6 +21,7 @@ import ixa.kaflib.KAFDocument;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,7 +30,6 @@ import java.io.OutputStreamWriter;
 import java.util.Properties;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -133,7 +133,7 @@ public class CLI {
     } catch (ArgumentParserException e) {
       argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-parse-" + version
-          + "(parse|train|eval) -help for details");
+          + ".jar" +  " (parse|train|eval) -help for details");
       System.exit(1);
     }
   }
@@ -184,56 +184,32 @@ public class CLI {
   }
 
   public final void eval() throws IOException {
-    /*
-    String headFinderOption;
-    if (parsedArguments.get("heads") == null) {
-      headFinderOption = "";
-    } else {
-      headFinderOption = parsedArguments.getString("heads");
-    }
-    HeadFinder headFinder = null;
+    
+    String lang = parsedArguments.getString("language");
     String model = parsedArguments.getString("model");
-
+    String headFinderOption = parsedArguments.getString("headFinder");
+    Properties properties = setEvaluateProperties(model, lang, headFinderOption);
+    Annotate annotator = new Annotate(properties);
     // special option to process treebank files adding headword marks
-    if (parsedArguments.getString("processTreebankWithHeadWords") != null) {
+    if (parsedArguments.getString("addHeads") != null) {
       File inputTree = new File(
-          parsedArguments.getString("processTreebankWithHeadWords"));
-      String lang = parsedArguments.getString("lang");
-      String ext = parsedArguments.getString("extension");
-      if (!headFinderOption.isEmpty()) {
-        if (lang.equalsIgnoreCase("en")) {
-
-          if (headFinderOption.equalsIgnoreCase("collins")) {
-            headFinder = new CollinsHeadFinder();
-          } else {
-            headFinder = new EnglishSemanticHeadFinder();
-          }
-        }
-        if (lang.equalsIgnoreCase("es")) {
-          if (headFinderOption.equalsIgnoreCase("collins")) {
-            headFinder = new AncoraHeadFinder();
-          } else {
-            headFinder = new AncoraHeadFinder();
-          }
-        }
-      }
-      Annotate annotator = new Annotate(lang, model, headFinder);
-      annotator.processTreebankWithHeadWords(inputTree, ext);
+          parsedArguments.getString("addHeads"));
+      annotator.processTreebankWithHeadWords(inputTree);
     }
-
     else if (parsedArguments.get("test") != null) {
       File inputTree = new File(parsedArguments.getString("test"));
-      String lang = parsedArguments.getString("lang");
-      Annotate annotator = new Annotate(lang, model);
       annotator.parseForTesting(inputTree);
-    }*/
+    }
   }
 
   public void loadAnnotateParameters() {
-    annotateParser.addArgument("-m", "--model")
-    .required(true)
-    .help("Choose parsing model.\n");
-    annotateParser.addArgument("-l", "--language").choices("en", "es")
+    annotateParser
+        .addArgument("-m", "--model")
+        .required(true)
+        .help("Choose parsing model.\n");
+    annotateParser
+        .addArgument("-l", "--language")
+         .choices("en", "es")
         .required(false)
         .help("Choose language; it defaults to the language value in incoming NAF file.\n");
     annotateParser
@@ -259,38 +235,39 @@ public class CLI {
 
   private void loadEvalParameters() {
     
-    evalParser.addArgument("-l", "--lang").choices("en", "es")
-        .required(false)
-        .help("Choose a language to perform annotation with ixa-pipe-parse.\n");
-    
-    evalParser.addArgument("-k", "--nokaf").action(Arguments.storeFalse())
-        .help("Do not print parse in KAF format, but plain text.\n");
-    
     evalParser
-        .addArgument("-g", "--heads")
-        .choices("collins", "sem")
-        .required(false)
-        .help("Choose between Collins-based or Stanford Semantic HeadFinder.\n");
-    evalParser.addArgument("-m", "--model").required(true).help("Choose model");
-
-    evalParser.addArgument("--processTreebankWithHeadWords").help(
-        "Takes a file as argument containing a parse tree in penn treebank "
-            + "(one line per sentence) format; "
-            + "this option requires --lang, --heads and --nokaf options.\n");
-    evalParser
-        .addArgument("--extension")
+    .addArgument("-m", "--model")
+    .required(true)
+    .help("Choose parsing model.\n");
+   evalParser
+    .addArgument("-l", "--language")
+     .choices("en", "es")
+    .required(true)
+    .help("Choose language.\n");
+   evalParser
+    .addArgument("-g", "--headFinder")
+    .choices("collins", "sem", Flags.DEFAULT_HEADFINDER)
+    .setDefault(Flags.DEFAULT_HEADFINDER)
+    .required(false)
+    .help("Choose between Collins or Semantic HeadFinder.\n");
+    evalParser.addArgument("--addHeads")
         .help(
-            "Specify extension of files, e.g. '.txt' or '' for every file, "
-                + "to be processed by the --processTreebankWithHeadWords directory option.\n");
+        "Takes a file or a directory as argument containing a parse tree in penn treebank (one line per sentence) format; this option requires --lang and --headFinder options.\n");
     evalParser
         .addArgument("--test")
         .help(
-            "Takes a file as argument containing the tokenized text "
-                + "of a gold standard Penn Treebank file to process it; It produces a test file for its "
-                + "parseval evaluation with EVALB.\n");
+            "Takes a file as argument containing the tokenized text of a gold standard Penn Treebank file to process it; It produces a test file for its parseval evaluation with EVALB.\n");
   }
   
   private Properties setAnnotateProperties(String model, String language, String headFinder) {
+    Properties annotateProperties = new Properties();
+    annotateProperties.setProperty("model", model);
+    annotateProperties.setProperty("language", language);
+    annotateProperties.setProperty("headFinder", headFinder);
+    return annotateProperties;
+  }
+  
+  private Properties setEvaluateProperties(String model, String language, String headFinder) {
     Properties annotateProperties = new Properties();
     annotateProperties.setProperty("model", model);
     annotateProperties.setProperty("language", language);
