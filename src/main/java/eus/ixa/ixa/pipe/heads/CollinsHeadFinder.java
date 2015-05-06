@@ -68,12 +68,12 @@ public class CollinsHeadFinder implements HeadFinder {
       // When a node is here its '=H' annotation has already happened
       // so it '=H' has to be removed to match with the head rules
       String type = currentNode.getType().replace(HEADMARK, "");
-      if (currentNode.getType().equals(opennlp.tools.parser.AbstractBottomUpParser.TOP_NODE)) { 
+      /*if (currentNode.getType().equals(opennlp.tools.parser.AbstractBottomUpParser.TOP_NODE)) { 
       currentNode.getChildren()[0].setType(currentNode.getChildren()[0].getType() + HEADMARK);
+      }*/
       if (DEBUG) {
         System.err.println(currentNode.toString());
       }
-    }
       Parse[] children = currentNode.getChildren();
       Parse headChild = null;
       if (children.length > 0) {

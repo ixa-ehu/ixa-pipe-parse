@@ -143,26 +143,6 @@ public class Annotate {
    StringBuffer parsingDoc = getParse(kaf);
    return parsingDoc.toString();
  }
-
- 
- 
- /**
-  * Takes as input a list of parse strings, one for line, and annotates the
-  * headwords
-  * 
-  * @param inputTrees
-  * @return a list of parse trees with headwords annotated
-  */
- private String addHeadWordsToTreebank(List<String> inputTrees) {
-   StringBuffer parsedDoc = new StringBuffer();
-   for (String parseSent : inputTrees) {
-     Parse parsedSentence = Parse.parseParse(parseSent);
-     headFinder.printHeads(parsedSentence);
-     parsedSentence.show(parsedDoc);
-     parsedDoc.append("\n");
-   }
-   return parsedDoc.toString();
- }
  
  public void parseForTesting(File inputText) throws IOException {
    StringBuffer parsingDoc = new StringBuffer();
@@ -173,9 +153,9 @@ public class Annotate {
        parsedSentence.show(parsingDoc);
        parsingDoc.append("\n");
        }
-     File outfile = new File(FilenameUtils.removeExtension(inputText.getPath())+ ".test");
+     File outfile = new File(FilenameUtils.removeExtension(inputText.getPath()) + ".test");
      System.err.println("Writing test parse file to " + outfile);
-     FileUtils.writeStringToFile(outfile, parsingDoc.toString(),"UTF-8");  
+     FileUtils.writeStringToFile(outfile, parsingDoc.toString(), "UTF-8");  
      }  
    else { 
      System.out.println("Choose a correct file!");
@@ -237,5 +217,22 @@ public class Annotate {
        }
      }
    }
+ }
+ /**
+  * Takes as input a list of parse strings, one for line, and annotates the
+  * headwords
+  * 
+  * @param inputTrees
+  * @return a list of parse trees with headwords annotated
+  */
+ private String addHeadWordsToTreebank(List<String> inputTrees) {
+   StringBuffer parsedDoc = new StringBuffer();
+   for (String parseSent : inputTrees) {
+     Parse parsedSentence = Parse.parseParse(parseSent);
+     headFinder.printHeads(parsedSentence);
+     parsedSentence.show(parsedDoc);
+     parsedDoc.append("\n");
+   }
+   return parsedDoc.toString();
  }
 }
