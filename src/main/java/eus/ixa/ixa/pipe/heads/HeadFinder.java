@@ -1,6 +1,5 @@
 /*
- *
- *Copyright 2013 Rodrigo Agerri
+ *Copyright 2015 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,25 +14,25 @@
    limitations under the License.
  */
 
-
 package eus.ixa.ixa.pipe.heads;
 
 import opennlp.tools.parser.Parse;
 
 /**
+ * HeadFinder interface.
+ * 
  * @author ragerri
- *
+ * @version 2015-05-05
  */
-
-
 public interface HeadFinder {
-	
-	/**
-	 * It reads a Parse object and adds the heads for each constituent following
-	 * some head rules. 
-	 * 
-	 * @param parse
-	 */
-	public void printHeads(Parse parse);
+
+  /**
+   * Reads a Parse object and adds the heads for each constituent following some
+   * head rules.
+   * 
+   * @param parse
+   *          the parse object
+   */
+  public void printHeads(Parse parse);
 
 }

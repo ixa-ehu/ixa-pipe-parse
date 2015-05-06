@@ -29,8 +29,9 @@ import opennlp.tools.parser.ParserFactory;
 import opennlp.tools.parser.ParserModel;
 
 /**
- * Probabilistic Constituent Parser based on Apache OpenNLP
- * shift-reduced parser (Ratnapharki 1999).
+ * Probabilistic Constituent Parser based on Apache OpenNLP shift-reduced parser
+ * (Ratnapharki 1999).
+ * 
  * @author ragerri
  * @version 2015-04-30
  */
@@ -38,32 +39,32 @@ import opennlp.tools.parser.ParserModel;
 public class ConstituentParsing {
 
   /**
-   * The models to use for every language. The keys of the hash are the
-   * language codes, the values the models.
+   * The models to use for every language. The keys of the hash are the language
+   * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, ParserModel> parseModels =
-      new ConcurrentHashMap<String, ParserModel>();
+  private static ConcurrentHashMap<String, ParserModel> parseModels = new ConcurrentHashMap<String, ParserModel>();
   /**
    * The parser.
    */
-  private Parser parser;
+  private final Parser parser;
 
-  public ConstituentParsing(Properties properties) {
-    String lang = properties.getProperty("language");
-    String model = properties.getProperty("model");
-    ParserModel parserModel = loadModel(lang, model);
-    parser = ParserFactory.create(parserModel);
+  public ConstituentParsing(final Properties properties) {
+    final String lang = properties.getProperty("language");
+    final String model = properties.getProperty("model");
+    final ParserModel parserModel = loadModel(lang, model);
+    this.parser = ParserFactory.create(parserModel);
   }
-  
-  private final ParserModel loadModel(String lang, String model) {
-    long lStartTime = new Date().getTime();
+
+  private final ParserModel loadModel(final String lang, final String model) {
+    final long lStartTime = new Date().getTime();
     try {
-      parseModels.putIfAbsent(lang, new ParserModel(new FileInputStream(model)));
-    } catch (IOException e) {
+      parseModels
+          .putIfAbsent(lang, new ParserModel(new FileInputStream(model)));
+    } catch (final IOException e) {
       e.printStackTrace();
-    } 
-    long lEndTime = new Date().getTime();
-    long difference = lEndTime - lStartTime;
+    }
+    final long lEndTime = new Date().getTime();
+    final long difference = lEndTime - lStartTime;
     System.err.println("ixa-pipe-parse model loaded in: " + difference
         + " miliseconds ... [DONE]");
     return parseModels.get(lang);
@@ -75,14 +76,17 @@ public class ConstituentParsing {
    * treebank format by using the Parse.show() function.
    * 
    * 
-   * @param sentence tokenized sentence
-   * @param numParses number of parses
+   * @param sentence
+   *          tokenized sentence
+   * @param numParses
+   *          number of parses
    * @return an array Parse objects (as many as numParses parameter)
    * 
    * */
-  public Parse[] parse(String sentence, int numParses) {
-    Parse[] parsedSentence = ParserTool.parseLine(sentence, parser, numParses);
+  public Parse[] parse(final String sentence, final int numParses) {
+    final Parse[] parsedSentence = ParserTool.parseLine(sentence, this.parser,
+        numParses);
     return parsedSentence;
   }
-  
+
 }

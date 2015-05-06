@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 package eus.ixa.ixa.pipe.heads;
 
 import java.io.BufferedReader;
@@ -30,92 +29,95 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
+import opennlp.tools.parser.AbstractBottomUpParser;
 import opennlp.tools.parser.Constituent;
 import opennlp.tools.parser.GapLabeler;
 import opennlp.tools.parser.Parse;
-import opennlp.tools.parser.chunking.Parser;
 
 /**
- * Class for storing the English head rules associated with parsing. The headrules
- * are specified in $src/main/resources/en-head-rules
- *  
- * NOTE: This is the very same class than the one inside opennlp.tools.parser.lang.en. The only
- * change is the return of the getHead() method: 
+ * Class for storing the English head rules associated with parsing. The
+ * headrules are specified in $src/main/resources/en-head-rules
  * 
- * Before: return constituents[ci].getHead(); 
- * Now: return constituents[ci];
+ * NOTE: This is the very same class than the one inside
+ * opennlp.tools.parser.lang.en package. The main change is the return of the getHead()
+ * method: Every return constituents[i].getHead() has been replaced by the
+ * same return statement without the .getHead() method call.
  * 
- * Other changes include removal of deprecated methods we do not need to use. 
- * 
+ * Other changes include removal of deprecated methods we do not need to use and
+ * adding some other methods for debugging.
+ * @author ragerri
+ * @version 2015-05-06
  */
-public class EnglishHeadRules implements opennlp.tools.parser.HeadRules, GapLabeler {
+public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
+    GapLabeler {
 
   private static class HeadRule {
     public boolean leftToRight;
     public String[] tags;
-    public HeadRule(boolean l2r, String[] tags) {
-      leftToRight = l2r;
 
-      for (String tag : tags) {
-        if (tag == null)
-            throw new IllegalArgumentException("tags must not contain null values!");
+    public HeadRule(final boolean l2r, final String[] tags) {
+      this.leftToRight = l2r;
+
+      for (final String tag : tags) {
+        if (tag == null) {
+          throw new IllegalArgumentException(
+              "tags must not contain null values!");
+        }
       }
 
       this.tags = tags;
     }
-    
+
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
       if (obj == this) {
         return true;
-      }
-      else if (obj instanceof HeadRule) {
-        HeadRule rule = (HeadRule) obj;
-        
-        return (rule.leftToRight == leftToRight) && 
-            Arrays.equals(rule.tags, tags);
-      }
-      else {
+      } else if (obj instanceof HeadRule) {
+        final HeadRule rule = (HeadRule) obj;
+
+        return rule.leftToRight == this.leftToRight
+            && Arrays.equals(rule.tags, this.tags);
+      } else {
         return false;
       }
     }
   }
 
   private Map<String, HeadRule> headRules;
-  private Set<String> punctSet;
-
-  
+  private final Set<String> punctSet;
 
   /**
    * Creates a new set of head rules based on the specified reader.
-   *
-   * @param rulesReader the head rules reader.
-   *
-   * @throws IOException if the head rules reader can not be read.
+   * 
+   * @param rulesReader
+   *          the head rules reader.
+   * 
+   * @throws IOException
+   *           if the head rules reader can not be read.
    */
-  public EnglishHeadRules(Reader rulesReader) throws IOException {
-    BufferedReader in = new BufferedReader(rulesReader);
+  public EnglishHeadRules(final Reader rulesReader) throws IOException {
+    final BufferedReader in = new BufferedReader(rulesReader);
     readHeadRules(in);
 
-    punctSet = new HashSet<String>();
-    punctSet.add(".");
-    punctSet.add(",");
-    punctSet.add("``");
-    punctSet.add("''");
-    //punctSet.add(":");
+    this.punctSet = new HashSet<String>();
+    this.punctSet.add(".");
+    this.punctSet.add(",");
+    this.punctSet.add("``");
+    this.punctSet.add("''");
+    // punctSet.add(":");
   }
 
   public Set<String> getPunctuationTags() {
-    return punctSet;
+    return this.punctSet;
   }
 
-  public Parse getHead(Parse[] constituents, String type) {
-    if (constituents[0].getType() == Parser.TOK_NODE) {
+  public Parse getHead(final Parse[] constituents, final String type) {
+    if (constituents[0].getType() == AbstractBottomUpParser.TOK_NODE) {
       return null;
     }
     HeadRule hr;
     if (type.equals("NP") || type.equals("NX")) {
-      String[] tags1 = { "NN", "NNP", "NNPS", "NNS", "NX", "JJR", "POS" };
+      final String[] tags1 = { "NN", "NNP", "NNPS", "NNS", "NX", "JJR", "POS" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags1.length - 1; ti >= 0; ti--) {
           if (constituents[ci].getType().equals(tags1[ti])) {
@@ -123,12 +125,12 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
           }
         }
       }
-      for (int ci = 0; ci < constituents.length; ci++) {
-        if (constituents[ci].getType().equals("NP")) {
-          return constituents[ci];
+      for (final Parse constituent : constituents) {
+        if (constituent.getType().equals("NP")) {
+          return constituent;
         }
       }
-      String[] tags2 = { "$", "ADJP", "PRN" };
+      final String[] tags2 = { "$", "ADJP", "PRN" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags2.length - 1; ti >= 0; ti--) {
           if (constituents[ci].getType().equals(tags2[ti])) {
@@ -136,7 +138,7 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
           }
         }
       }
-      String[] tags3 = { "JJ", "JJS", "RB", "QP" };
+      final String[] tags3 = { "JJ", "JJS", "RB", "QP" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags3.length - 1; ti >= 0; ti--) {
           if (constituents[ci].getType().equals(tags3[ti])) {
@@ -144,12 +146,12 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
           }
         }
       }
-      return constituents[constituents.length - 1].getHead();
-    }
-    else if ((hr = headRules.get(type)) != null) {
-      String[] tags = hr.tags;
-      int cl = constituents.length;
-      int tl = tags.length;
+      //return constituents[constituents.length - 1].getHead();
+      return constituents[constituents.length - 1];
+    } else if ((hr = this.headRules.get(type)) != null) {
+      final String[] tags = hr.tags;
+      final int cl = constituents.length;
+      final int tl = tags.length;
       if (hr.leftToRight) {
         for (int ti = 0; ti < tl; ti++) {
           for (int ci = 0; ci < cl; ci++) {
@@ -158,9 +160,8 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
             }
           }
         }
-        return constituents[0].getHead();
-      }
-      else {
+        return constituents[0];
+      } else {
         for (int ti = 0; ti < tl; ti++) {
           for (int ci = cl - 1; ci >= 0; ci--) {
             if (constituents[ci].getType().equals(tags[ti])) {
@@ -168,111 +169,112 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules, GapLabe
             }
           }
         }
-        return constituents[cl - 1].getHead();
+        return constituents[cl - 1];
       }
     }
-    return constituents[constituents.length - 1].getHead();
+    return constituents[constituents.length - 1];
   }
 
-  private void readHeadRules(BufferedReader str) throws IOException {
+  private void readHeadRules(final BufferedReader str) throws IOException {
     String line;
-    headRules = new HashMap<String, HeadRule>(30);
+    this.headRules = new HashMap<String, HeadRule>(30);
     while ((line = str.readLine()) != null) {
-      StringTokenizer st = new StringTokenizer(line);
-      String num = st.nextToken();
-      String type = st.nextToken();
-      String dir = st.nextToken();
-      String[] tags = new String[Integer.parseInt(num) - 2];
+      final StringTokenizer st = new StringTokenizer(line);
+      final String num = st.nextToken();
+      final String type = st.nextToken();
+      final String dir = st.nextToken();
+      final String[] tags = new String[Integer.parseInt(num) - 2];
       int ti = 0;
       while (st.hasMoreTokens()) {
         tags[ti] = st.nextToken();
         ti++;
       }
-      headRules.put(type, new HeadRule(dir.equals("1"), tags));
+      this.headRules.put(type, new HeadRule(dir.equals("1"), tags));
     }
   }
 
-  public void labelGaps(Stack<Constituent> stack) {
+  public void labelGaps(final Stack<Constituent> stack) {
     if (stack.size() > 4) {
-      //Constituent con0 = (Constituent) stack.get(stack.size()-1);
-      Constituent con1 = stack.get(stack.size()-2);
-      Constituent con2 = stack.get(stack.size()-3);
-      Constituent con3 = stack.get(stack.size()-4);
-      Constituent con4 = stack.get(stack.size()-5);
-      //System.err.println("con0="+con0.label+" con1="+con1.label+" con2="+con2.label+" con3="+con3.label+" con4="+con4.label);
-      //subject extraction
-      if (con1.getLabel().equals("NP") && con2.getLabel().equals("S") && con3.getLabel().equals("SBAR")) {
-        con1.setLabel(con1.getLabel()+"-G");
-        con2.setLabel(con2.getLabel()+"-G");
-        con3.setLabel(con3.getLabel()+"-G");
+      // Constituent con0 = (Constituent) stack.get(stack.size()-1);
+      final Constituent con1 = stack.get(stack.size() - 2);
+      final Constituent con2 = stack.get(stack.size() - 3);
+      final Constituent con3 = stack.get(stack.size() - 4);
+      final Constituent con4 = stack.get(stack.size() - 5);
+      // System.err.println("con0="+con0.label+" con1="+con1.label+" con2="+con2.label+" con3="+con3.label+" con4="+con4.label);
+      // subject extraction
+      if (con1.getLabel().equals("NP") && con2.getLabel().equals("S")
+          && con3.getLabel().equals("SBAR")) {
+        con1.setLabel(con1.getLabel() + "-G");
+        con2.setLabel(con2.getLabel() + "-G");
+        con3.setLabel(con3.getLabel() + "-G");
       }
-      //object extraction
-      else if (con1.getLabel().equals("NP") && con2.getLabel().equals("VP") && con3.getLabel().equals("S") && con4.getLabel().equals("SBAR")) {
-        con1.setLabel(con1.getLabel()+"-G");
-        con2.setLabel(con2.getLabel()+"-G");
-        con3.setLabel(con3.getLabel()+"-G");
-        con4.setLabel(con4.getLabel()+"-G");
+      // object extraction
+      else if (con1.getLabel().equals("NP") && con2.getLabel().equals("VP")
+          && con3.getLabel().equals("S") && con4.getLabel().equals("SBAR")) {
+        con1.setLabel(con1.getLabel() + "-G");
+        con2.setLabel(con2.getLabel() + "-G");
+        con3.setLabel(con3.getLabel() + "-G");
+        con4.setLabel(con4.getLabel() + "-G");
       }
     }
   }
 
   /**
-   * Writes the head rules to the writer in a format suitable for loading
-   * the head rules again with the constructor. The encoding must be
-   * taken into account while working with the writer and reader.
-   * <p> 
-   * After the entries have been written, the writer is flushed.
-   * The writer remains open after this method returns.
+   * Writes the head rules to the writer in a format suitable for loading the
+   * head rules again with the constructor. The encoding must be taken into
+   * account while working with the writer and reader.
+   * <p>
+   * After the entries have been written, the writer is flushed. The writer
+   * remains open after this method returns.
    * 
    * @param writer
+   *          the writer
    * @throws IOException
+   *           if io exception
    */
-  public void serialize(Writer writer) throws IOException {
+  public void serialize(final Writer writer) throws IOException {
 
-    for (String type : headRules.keySet()) {
-
-      HeadRule headRule = headRules.get(type);
-
+    for (final String type : this.headRules.keySet()) {
+      final HeadRule headRule = this.headRules.get(type);
       // write num of tags
       writer.write(Integer.toString(headRule.tags.length + 2));
       writer.write(' ');
-
       // write type
       writer.write(type);
       writer.write(' ');
-
       // write l2r true == 1
-      if (headRule.leftToRight)
+      if (headRule.leftToRight) {
         writer.write("1");
-      else
+      } else {
         writer.write("0");
-
+      }
       // write tags
-      for (String tag : headRule.tags) {
+      for (final String tag : headRule.tags) {
         writer.write(' ');
         writer.write(tag);
       }
-
       writer.write('\n');
     }
-    
     writer.flush();
   }
-  
+
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (obj == this) {
       return true;
-    }
-    else if (obj instanceof EnglishHeadRules) {
-      EnglishHeadRules rules = (EnglishHeadRules) obj;
-      
-      return rules.headRules.equals(headRules) &&
-          rules.punctSet.equals(punctSet);
-    }
-    else {
+    } else if (obj instanceof EnglishHeadRules) {
+      final EnglishHeadRules rules = (EnglishHeadRules) obj;
+
+      return rules.headRules.equals(this.headRules)
+          && rules.punctSet.equals(this.punctSet);
+    } else {
       return false;
     }
   }
-}
 
+  @Override
+  public int hashCode() {
+    assert false : "hashCode not designed";
+    return 42; // any arbitrary constant will do
+  }
+}
