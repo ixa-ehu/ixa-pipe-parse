@@ -100,7 +100,6 @@ public class Annotate {
      // Constituent Parsing
      String sent = getSentenceFromTokens(tokens);
      Parse[] parsedSentence = parser.parse(sent, 1);
-
      if (markHeads) {
        for (Parse parse : parsedSentence) {
          headFinder.printHeads(parse);
@@ -180,7 +179,7 @@ public class Annotate {
      List<String> inputTrees = Files.readLines(
          new File(dir.getCanonicalPath()), Charsets.UTF_8);
      File outfile = new File(Files.getNameWithoutExtension(dir.getPath())
-         + ".th");
+         + ".head");
      String outTree = addHeadWordsToTreebank(inputTrees);
      Files.write(outTree, outfile, Charsets.UTF_8);
      System.err.println(">> Wrote headWords to " + outfile);

@@ -58,8 +58,7 @@ public class CLI {
    * Get dynamically the version of ixa-pipe-parse by looking at the MANIFEST
    * file.
    */
-  private final String version = CLI.class.getPackage()
-      .getImplementationVersion();
+  private final String version = CLI.class.getPackage().getImplementationVersion();
   /**
    * Get the git commit of the ixa-pipe-parse compiled by looking at the MANIFEST
    * file.
@@ -192,8 +191,7 @@ public class CLI {
     Annotate annotator = new Annotate(properties);
     // special option to process treebank files adding headword marks
     if (parsedArguments.getString("addHeads") != null) {
-      File inputTree = new File(
-          parsedArguments.getString("addHeads"));
+      File inputTree = new File(parsedArguments.getString("addHeads"));
       annotator.processTreebankWithHeadWords(inputTree);
     }
     else if (parsedArguments.get("test") != null) {

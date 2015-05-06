@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import opennlp.tools.parser.HeadRules;
 import opennlp.tools.parser.Parse;
@@ -25,6 +26,7 @@ public class CollinsHeadFinder implements HeadFinder {
   private HeadRules headRules;
   private static boolean DEBUG = false;
   public static final String HEADMARK = "=H";
+  public static Pattern doubleHeadMark = Pattern.compile("=H=H");
 
   public CollinsHeadFinder(Properties properties) {
     String lang = properties.getProperty("language");
@@ -60,6 +62,10 @@ public class CollinsHeadFinder implements HeadFinder {
   }
 
   public void printHeads(Parse parse) {
+    if (parse == null || parse.getChildCount() == 0) {
+      throw new IllegalArgumentException(
+          "Can't return head of null or leaf Parse.");
+    }
     LinkedList<Parse> nodes = new LinkedList<Parse>();
     nodes.add(parse);
     // This is a recursive iteration over the whole parse tree
@@ -68,11 +74,13 @@ public class CollinsHeadFinder implements HeadFinder {
       // When a node is here its '=H' annotation has already happened
       // so it '=H' has to be removed to match with the head rules
       String type = currentNode.getType().replace(HEADMARK, "");
-      /*if (currentNode.getType().equals(opennlp.tools.parser.AbstractBottomUpParser.TOP_NODE)) { 
-      currentNode.getChildren()[0].setType(currentNode.getChildren()[0].getType() + HEADMARK);
-      }*/
+      //add head to the first node after TOP
+      if (currentNode.getType().equals(opennlp.tools.parser.AbstractBottomUpParser.TOP_NODE)) {
+        String sentenceType = currentNode.getChildren()[0].getType().replaceAll(HEADMARK, "");
+        currentNode.getChildren()[0].setType(sentenceType + HEADMARK);
+      }
       if (DEBUG) {
-        System.err.println(currentNode.toString());
+        System.err.println("-> Current Node: " + type + " " + currentNode.toString());
       }
       Parse[] children = currentNode.getChildren();
       Parse headChild = null;
@@ -83,7 +91,11 @@ public class CollinsHeadFinder implements HeadFinder {
       // and also add to the queue for the recursive processing
       for (Parse child : currentNode.getChildren()) {
         if (child == headChild) {
-          child.setType(child.getType() + HEADMARK);
+          if (!child.getType().contains(HEADMARK)) {
+            child.setType(child.getType() + HEADMARK);
+          } else {
+            child.setType(child.getType());
+          }
         }
         // add child to last of LinkedList which will 
         // now take as currentNode the child of this child

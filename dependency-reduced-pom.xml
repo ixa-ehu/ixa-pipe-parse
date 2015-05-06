@@ -5,7 +5,7 @@
   <artifactId>ixa-pipe-parse</artifactId>
   <name>ixa-pipe-parse</name>
   <version>1.0.3</version>
-  <description>ixa-pipes constituent parser (ixa2.si.ehu.es/ixa-pipes)</description>
+  <description>ixa pipes constituent parser (ixa2.si.ehu.es/ixa-pipes)</description>
   <url>ixa2.si.ehu.es/ixa-pipes</url>
   <prerequisites>
     <maven>3.0</maven>
@@ -15,6 +15,8 @@
       <id>ragerri</id>
       <name>Rodrigo Agerri</name>
       <email>rodrigo.agerri@ehu.eus</email>
+      <organization>IXA NLP Group</organization>
+      <organizationUrl>http://ixa.eus</organizationUrl>
     </developer>
   </developers>
   <licenses>
@@ -25,7 +27,7 @@
   </licenses>
   <scm>
     <connection>scm:git:git@github.com:ixa-ehu/ixa-pipe-parse.git</connection>
-    <developerConnection>scm:git:git@github.com:ixa-ehu/ixa-pipe-nerc.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:ixa-ehu/ixa-pipe-parse.git</developerConnection>
     <url>https://github.com/ixa-ehu/ixa-pipe-parse</url>
   </scm>
   <build>
@@ -126,6 +128,12 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>apache opennlp snapshots</id>
+      <url>https://repository.apache.org/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

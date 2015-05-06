@@ -42,7 +42,8 @@ import opennlp.tools.parser.chunking.Parser;
  * NOTE: This is the very same class than the one inside opennlp.tools.parser.lang.en. The only
  * change is the return of the getHead() method: 
  * 
- * Before: return constituents[ci].getHead(); Now: return constituents[ci];
+ * Before: return constituents[ci].getHead(); 
+ * Now: return constituents[ci];
  * 
  * Other changes include removal of deprecated methods we do not need to use. 
  * 
