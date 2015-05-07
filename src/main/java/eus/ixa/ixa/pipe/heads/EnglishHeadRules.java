@@ -116,6 +116,7 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
       return null;
     }
     HeadRule hr;
+    //right
     if (type.equals("NP") || type.equals("NX")) {
       final String[] tags1 = { "NN", "NNP", "NNPS", "NNS", "NX", "JJR", "POS" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
@@ -125,11 +126,13 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
           }
         }
       }
+      //left
       for (final Parse constituent : constituents) {
         if (constituent.getType().equals("NP")) {
           return constituent;
         }
       }
+      //right
       final String[] tags2 = { "$", "ADJP", "PRN" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags2.length - 1; ti >= 0; ti--) {
@@ -138,6 +141,13 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
           }
         }
       }
+      //right
+      for (int ci = constituents.length - 1; ci >= 0; ci--) {
+        if (constituents[ci].getType().equals("CD")) {
+          return constituents[ci];
+        }
+      }
+      //right
       final String[] tags3 = { "JJ", "JJS", "RB", "QP" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags3.length - 1; ti >= 0; ti--) {
@@ -146,7 +156,7 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
           }
         }
       }
-      //return constituents[constituents.length - 1].getHead();
+      //else return the last word
       return constituents[constituents.length - 1];
     } else if ((hr = this.headRules.get(type)) != null) {
       final String[] tags = hr.tags;
@@ -160,8 +170,10 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
             }
           }
         }
+        //else return the first constituent
         return constituents[0];
       } else {
+        //right
         for (int ti = 0; ti < tl; ti++) {
           for (int ci = cl - 1; ci >= 0; ci--) {
             if (constituents[ci].getType().equals(tags[ti])) {
@@ -169,6 +181,7 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
             }
           }
         }
+        //else return the last constituent
         return constituents[cl - 1];
       }
     }

@@ -148,6 +148,14 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
           }
         }
       }
+      final String[] tags4 = { "COORD", "CONJ", "CS" };
+      for (int ci = constituents.length - 1; ci >= 0; ci--) {
+        for (int ti = tags2.length - 1; ti >= 0; ti--) {
+          if (constituents[ci].getType().equals(tags4[ti])) {
+            return constituents[ci];
+          }
+        }
+      }
       final String[] tags3 = { "AQ0MS0", "AQ0FS0", "AQ0CS0", "AQ0MSP",
           "AQ0FSP", "AQ0CSP", "AQ0CNP", "AQ0MP0", "AQ0FP0", "AQ0CP0", "AQ0MPP",
           "AQ0FPP", "AQ0CPP", "AQ0MN0", "AQ0FN0", "AQ0CN0", "AQ0MNP", "AQ0FNP",
