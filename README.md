@@ -1,9 +1,9 @@
 
 ixa-pipe-parse
 ==============
-ixa-pipe-parse is a probabilistic constituent parser for English and Spanish. 
-ixa-pipe-parse is part of IXA pipes, a multilingual NLP pipeline developed 
-by the IXA NLP Group [http://ixa2.si.ehu.es/ixa-pipes]. 
+ixa-pipe-parse is a statistical constituent parser for English and Spanish.
+ixa-pipe-parse is part of IXA pipes, a set of multilingual NLP tools developed
+by the IXA NLP Group [http://ixa2.si.ehu.es/ixa-pipes].
 
 Please go to [http://ixa2.si.ehu.es/ixa-pipes] for general information about the IXA
 pipes tools but also for **official releases, including source code and binary
@@ -14,25 +14,24 @@ and install this repository instead of using the releases provided in
 [http://ixa2.si.ehu.es/ixa-pipes], please scroll down to the end of the document for
 the [installation instructions](#installation).
 
-## OVERVIEW 
+## OVERVIEW
 
 ixa-pipe-parse provides:
 
   + Constituent parsing for English trained on the Penn Treebank and for Spanish trained on the
-    [Ancora corpus](http://clic.ub.edu/corpus/ancora). 
-  + HeadFinders based on Collins head rules (Michael Collins PhD thesis, 1999) and
-    Stanford's parser Semantic Head Rules. 
+    [Ancora corpus](http://clic.ub.edu/corpus/ancora).
+  + HeadFinders based on Collins head rules (Michael ollins PhD thesis, 1999).
 
-For this first release we provide two reasonably fast Maximum Entropy models based on a bottom-up shift-reduce method as 
-described by Adwait Ratnaparkhi (1999). To avoid duplication of efforts, we use the machine learning API 
-provided by the [Apache OpenNLP project](http://opennlp.apache.org).
+For this first release we provide two Maximum Entropy models based on a bottom-up shift-reduce method as
+described by Adwait Ratnaparkhi (1999). To avoid duplication of efforts, we use the machine learning API
+provided by the [Apache OpenNLP project](http://opennlp.apache.org) to train and deploy the models.
 
-Therefore, the following models are provided in the [parse-resources.tgz](http://ixa2.si.ehu.es/ixa-pipes/models/parse-resources.tgz) package: 
+Therefore, the following models are provided in the [parse-models.tgz](http://ixa2.si.ehu.es/ixa-pipes/models/parse-models.tgz) package:
 
 * **English Models**:
   + Penn Treebank: **en-parser-chunking.bin**: F1 87.42
 
-+ **Spanish Models**: 
++ **Spanish Models**:
   + CoNLL **es-parser-chunking.bin**: F1 88.40
 
 ixa-pipe-parse is distributed under Apache License version 2.0 (see LICENSE.txt for details).
@@ -49,7 +48,7 @@ ixa-pipe-parse provides 3 basic functionalities:
 
 Each of these functionalities are accessible by adding (parse|train|eval) as a
 subcommand to ixa-pipe-parse-$version.jar. Please read below and check the -help
-parameter: 
+parameter:
 
 ````shell
 java -jar target/ixa-pipe-parse-$version.jar (parse|train|eval) -help
@@ -57,10 +56,10 @@ java -jar target/ixa-pipe-parse-$version.jar (parse|train|eval) -help
 
 ### Parsing with ixa-pipe-parse
 
-If you are in hurry, just execute: 
+If you are in hurry, just execute:
 
 ````shell
-cat file.txt | ixa-pipe-tok | ixa-pipe-pos | java -jar $PATH/target/ixa-pipe-parse-$version.jar parse
+cat file.txt | ixa-pipe-tok | ixa-pipe-pos | java -jar $PATH/target/ixa-pipe-parse-$version.jar parse -m model.bin
 ````
 
 If you want to know more, please follow reading.
@@ -70,34 +69,23 @@ through standard output. The NAF format specification is here:
 
 (http://wordpress.let.vupr.nl/naf/)
 
-You can get the necessary input for ixa-pipe-parse by piping 
-[ixa-pipe-tok](https://github.com/ixa-ehu/ixa-pipe-tok) and 
+You can get the necessary input for ixa-pipe-parse by piping
+[ixa-pipe-tok](https://github.com/ixa-ehu/ixa-pipe-tok) and
 [ixa-pipe-pos](https://github.com/ixa-ehu/ixa-pipe-pos) as shown in the
-example. 
+example.
 
-There are several options to parse with ixa-pipe-parse: 
+There are several options to parse with ixa-pipe-parse:
 
-+ **lang**: choose between en and es. If no language is chosen, the one specified
++ **language**: choose between en and es. If no language is chosen, the one specified
   in the NAF header will be used.
-+ **features**: choose features to use during the decoding. Currently only one feature
-  types is provided: 
-  + **baseline**: it implements the features described in Ratnapharki (1999). 
-+ **model**: provide the model to do the parsing. If no model is provided via
-  this parameter, ixa-pipe-parse will revert to the baseline model distributed
-  in the parse-resources.tgz. 
-+ **beamsize**: choose beam size for decoding. There is no definitive evidence
-  that using larger or smaller beamsize actually improves accuracy. It is known
-  to slow things down considerably if beamsize is set to 100, for example.
-+ **nokaf**: switch to output parse trees in NAF or Penn Treebank oneline
-  format.
-+ **heads**: mark constituent headwords. Two methods are available:
-  + **collins**: Head rules as defined in Collins's thesis (1999).
-  + **sem**: Semantic head rules defined by the Stanford parser.
++ **model**: provide the model to do the parsing.
++ **outputFormat**: oneline EVALB format or NAF (the default).
++ **headFinder**: mark constituent headwords using the rules (and variants of) defined in Collins's thesis (1999).
 
-**Example**: 
+**Example**:
 
 ````shell
-cat file.txt | ixa-pipe-tok | ixa-pipe-pos | java -jar $PATH/target/ixa-pipe-parse-$version.jar parse
+cat file.txt | ixa-pipe-tok | ixa-pipe-pos | java -jar $PATH/target/ixa-pipe-parse-$version.jar parse -m model.bin
 ````
 
 ### Training new models
@@ -107,22 +95,15 @@ This option is in progress, not yet available.
 ### Evaluation
 
 To evaluate a trained model, the eval subcommand provides the following
-options: 
+options:
 
 + **language**: input en or es.
 + **model**: input the name of the model to evaluate.
-+ **features**: currently only default baseline available.
 + **test**: reads a tokenized gold standard and produces the test parse for
-  evaluation with evalb.
-+ **nokaf**: switch to output parse trees in NAF or Penn Treebank oneline
-  format.
-+ **heads**: mark constituent headwords. Two methods are available:
-  + **collins**: Head rules as defined in Collins's thesis (1999).
-  + **sem**: Semantic head rules defined by the Stanford parser.
-+ **processTreebankWithHeadWords**: reads directory/file containing oneline treebank
+  evaluation with EVALB.
++ **headFinder**: mark constituent headwords based on Collins's thesis (1999).
++ **addHeads**: reads directory/file containing oneline treebank
   format trees and annotate the headwords.
-+ **extension**:Specify extension of files, e.g. '.txt' or '' for every file to be
-  processed by the *processTreebankWithHeadWords* option.  
 
 **Example**:
 
@@ -159,7 +140,7 @@ Installing the ixa-pipe-parse requires the following steps:
 If you already have installed in your machine the Java 1.7+ and MAVEN 3, please go to step 3
 directly. Otherwise, follow these steps:
 
-### 1. Install JDK 1.7
+### 1. Install JDK 1.7 or JDK 1.8
 
 If you do not install JDK 1.7 in a default location, you will probably need to configure the PATH in .bashrc or .bash_profile:
 
@@ -221,21 +202,14 @@ If you must get the module source code from here do this:
 git clone https://github.com/ixa-ehu/ixa-pipe-parse
 ````
 
-### 4. Download the Resources
+### 4. Dowload the Models
 
-You will need to download the trained models and other resources and copy them to ixa-pipe-parse/src/main/resources/
-for the module to work properly:
-
-Download the models and untar the archive into the src/main/resources directory:
+Download and untar the models:
 
 ````shell
-cd ixa-pipe-parse/src/main/resources
-wget http://ixa2.si.ehu.es/ixa-pipes/models/parse-resources.tgz
-tar xvzf parse-resources.tgz
+wget http://ixa2.si.ehu.es/ixa-pipes/models/parse-models.tgz
+tar xvzf parse-models.tgz
 ````
-The parse-resources contains the baseline models to which ixa-pipe-parse backs off if not model is provided as parameter
-for tagging.
-
 ### 5. Compile
 
 ````shell
@@ -264,5 +238,5 @@ Rodrigo Agerri
 IXA NLP Group
 University of the Basque Country (UPV/EHU)
 E-20018 Donostia-San Sebastián
-rodrigo.agerri@ehu.es
+rodrigo.agerri@ehu.eus
 ````
