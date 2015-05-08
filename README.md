@@ -14,6 +14,18 @@ and install this repository instead of using the releases provided in
 [http://ixa2.si.ehu.es/ixa-pipes], please scroll down to the end of the document for
 the [installation instructions](#installation).
 
+**NOTICE!!**: ixa-pipe-parse is now in [Maven Central](http://search.maven.org/)
+for easy access to its API.
+
+## TABLE OF CONTENTS
+
+1. [Overview of ixa-pipe-parse](#overview)
+2. [Usage of ixa-pipe-parse](#cli-usage)
+  + [Parsing](#parsing)
+  + [Evaluation](#evaluation)
+3. [API via Maven Dependency](#api)
+4. [Git installation](#installation)
+
 ## OVERVIEW
 
 ixa-pipe-parse provides:
@@ -36,7 +48,7 @@ Therefore, the following models are provided in the [parse-models.tgz](http://ix
 
 ixa-pipe-parse is distributed under Apache License version 2.0 (see LICENSE.txt for details).
 
-## USING ixa-pipe-parse
+## CLI-Usage
 
 ixa-pipe-parse provides 3 basic functionalities:
 
@@ -54,7 +66,7 @@ parameter:
 java -jar target/ixa-pipe-parse-$version.jar (parse|train|eval) -help
 ````
 
-### Parsing with ixa-pipe-parse
+### Parsing
 
 If you are in hurry, just execute:
 
@@ -109,6 +121,19 @@ options:
 
 ````shell
 java -jar target/ixa.pipe.parse-$version.jar eval --test gold.tok -l en --model test.bin --nokaf > reference.tree
+````
+
+## API
+
+The easiest way to use ixa-pipe-tok programatically is via Apache Maven. Add
+this dependency to your pom.xml:
+
+````shell
+<dependency>
+    <groupId>eus.ixa</groupId>
+    <artifactId>ixa-pipe-parse</artifactId>
+    <version>1.1.0</version>
+</dependency>
 ````
 
 ## JAVADOC
