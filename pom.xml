@@ -65,23 +65,43 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
-
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>release</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>ru.concerteza.buildnumber</groupId>
-				<artifactId>maven-jgit-buildnumber-plugin</artifactId>
-				<version>1.2.8</version>
-				<executions>
-					<execution>
-						<id>git-buildnumber</id>
-						<goals>
-							<goal>extract-buildnumber</goal>
-						</goals>
-						<phase>prepare-package</phase>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
@@ -108,7 +128,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<configuration>
-					<mainClass>eus.ixa.ixa.pipe.parse.CLI</mainClass>
+					<mainClass>eus.ixa.ixa.pipe.pos.CLI</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -134,6 +154,20 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>ru.concerteza.buildnumber</groupId>
+				<artifactId>maven-jgit-buildnumber-plugin</artifactId>
+				<version>1.2.8</version>
+				<executions>
+					<execution>
+						<id>git-buildnumber</id>
+						<goals>
+							<goal>extract-buildnumber</goal>
+						</goals>
+						<phase>prepare-package</phase>
 					</execution>
 				</executions>
 			</plugin>
