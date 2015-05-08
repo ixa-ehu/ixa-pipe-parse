@@ -3,7 +3,7 @@ ixa-pipe-parse
 ==============
 ixa-pipe-parse is a statistical constituent parser for English and Spanish.
 ixa-pipe-parse is part of IXA pipes, a set of multilingual NLP tools developed
-by the IXA NLP Group [http://ixa2.si.ehu.es/ixa-pipes].
+by the IXA NLP Group [http://ixa2.si.ehu.es/ixa-pipes]. Current version is *1.1.0*.
 
 Please go to [http://ixa2.si.ehu.es/ixa-pipes] for general information about the IXA
 pipes tools but also for **official releases, including source code and binary
