@@ -150,7 +150,7 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
       }
       final String[] tags4 = { "COORD", "CONJ", "CS" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
-        for (int ti = tags2.length - 1; ti >= 0; ti--) {
+        for (int ti = tags4.length - 1; ti >= 0; ti--) {
           if (constituents[ci].getType().equals(tags4[ti])) {
             return constituents[ci];
           }
