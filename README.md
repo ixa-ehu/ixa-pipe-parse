@@ -19,8 +19,8 @@ the [installation instructions](#installation).
 ixa-pipe-parse provides:
 
   + Constituent parsing for English trained on the Penn Treebank and for Spanish trained on the
-    [Ancora corpus](http://clic.ub.edu/corpus/ancora).
-  + HeadFinders based on Collins head rules (Michael ollins PhD thesis, 1999).
+    [Ancora corpus](http://clic.ub.edu/corpus/ancora). 
+  + HeadFinders based on Collins head rules (Michael Collins PhD thesis, 1999).
 
 For this first release we provide two Maximum Entropy models based on a bottom-up shift-reduce method as
 described by Adwait Ratnaparkhi (1999). To avoid duplication of efforts, we use the machine learning API
