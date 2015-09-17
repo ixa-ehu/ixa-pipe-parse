@@ -33,7 +33,7 @@ import opennlp.tools.parser.ParserModel;
  * (Ratnapharki 1999).
  * 
  * @author ragerri
- * @version 2015-04-30
+ * @version 2015-09-17
  */
 
 public class ConstituentParsing {
@@ -58,8 +58,11 @@ public class ConstituentParsing {
   private final ParserModel loadModel(final String lang, final String model) {
     final long lStartTime = new Date().getTime();
     try {
-      parseModels
-          .putIfAbsent(lang, new ParserModel(new FileInputStream(model)));
+      synchronized (parseModels) {
+        if (!parseModels.containsKey(lang)) {
+          parseModels.put(lang, new ParserModel(new FileInputStream(model)));
+        }
+      }
     } catch (final IOException e) {
       e.printStackTrace();
     }
