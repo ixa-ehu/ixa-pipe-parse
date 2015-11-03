@@ -19,6 +19,7 @@ public class Flags {
 
   public static final String DEFAULT_HEADFINDER = "no";
   public static final String DEFAULT_OUTPUT_FORMAT = "naf";
+  public static final String DEFAULT_HOSTNAME = "localhost";
 
   /**
    * This class is to be statically used.

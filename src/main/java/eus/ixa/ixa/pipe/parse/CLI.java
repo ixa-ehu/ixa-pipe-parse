@@ -18,14 +18,19 @@ package eus.ixa.ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.util.Properties;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -90,6 +95,14 @@ public class CLI {
    * The parser that manages the evaluation sub-command.
    */
   private final Subparser evalParser;
+  /**
+   *  Parser to start TCP socket for server-client functionality.
+   */
+ private Subparser serverParser;
+ /**
+  * Sends queries to the serverParser for annotation.
+  */
+ private Subparser clientParser;
 
   /**
    * Construct a CLI object with the three sub-parsers to manage the command
@@ -103,6 +116,10 @@ public class CLI {
     loadTrainingParameters();
     this.evalParser = this.subParsers.addParser("eval").help("Evaluation CLI");
     loadEvalParameters();
+    serverParser = subParsers.addParser("server").help("Start TCP socket server");
+    loadServerParameters();
+    clientParser = subParsers.addParser("client").help("Send queries to the TCP socket server");
+    loadClientParameters();
   }
 
   public static void main(final String[] args) throws IOException,
@@ -133,11 +150,15 @@ public class CLI {
         eval();
       } else if (args[0].equals("train")) {
         train();
+      } else if (args[0].equals("server")) {
+        server();
+      } else if (args[0].equals("client")) {
+        client(System.in, System.out);
       }
     } catch (final ArgumentParserException e) {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-parse-" + this.version
-          + ".jar" + " (parse|train|eval) -help for details");
+          + ".jar" + " (parse|train|eval|server|client) -help for details");
       System.exit(1);
     }
   }
@@ -209,6 +230,69 @@ public class CLI {
       annotator.parseForTesting(inputTree);
     }
   }
+  
+  /**
+   * Set up the TCP socket for annotation.
+   */
+  public final void server() {
+
+    // load parameters into a properties
+    String port = parsedArguments.getString("port");
+    String model = parsedArguments.getString("model");
+    String headFinder = parsedArguments.getString("headFinder");
+    String outputFormat = parsedArguments.getString("outputFormat");
+    // language parameter
+    String lang = parsedArguments.getString("language");
+    Properties serverproperties = setServerProperties(port, model, lang, headFinder, outputFormat);
+    new ConstituentParserServer(serverproperties);
+  }
+  
+  /**
+   * The client to query the TCP server for annotation.
+   * 
+   * @param inputStream
+   *          the stdin
+   * @param outputStream
+   *          stdout
+   */
+  public final void client(final InputStream inputStream,
+      final OutputStream outputStream) {
+
+    String host = parsedArguments.getString("host");
+    String port = parsedArguments.getString("port");
+    try (Socket socketClient = new Socket(host, Integer.parseInt(port));
+        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
+            System.in, "UTF-8"));
+        BufferedWriter outToUser = new BufferedWriter(new OutputStreamWriter(
+            System.out, "UTF-8"));
+        DataOutputStream outToServer = new DataOutputStream(
+            socketClient.getOutputStream());
+        DataInputStream inFromServer = new DataInputStream(new BufferedInputStream(
+            socketClient.getInputStream()));) {
+      
+      // send data to server socket
+      String line;
+      while ((line = inFromUser.readLine()) != null) {
+        outToServer.writeBoolean(false);
+        outToServer.writeUTF(line);
+      }
+      outToServer.writeBoolean(true);
+      //get data from server
+      byte[] kafArray = new byte[1024];
+      ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
+      int count;
+      while ((count = inFromServer.read(kafArray)) > 0) {
+        byteArrayStream.write(kafArray, 0, count);
+      }
+      String kafString = byteArrayStream.toString();
+      outToUser.write(kafString);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
 
   public void loadAnnotateParameters() {
     this.annotateParser.addArgument("-m", "--model").required(true)
@@ -253,6 +337,43 @@ public class CLI {
         .help(
             "Takes a file as argument containing the tokenized text of a gold standard Penn Treebank file to process it; It produces a test file for its parseval evaluation with EVALB.\n");
   }
+  
+
+  /**
+   * Create the available parameters for NER tagging.
+   */
+  private void loadServerParameters() {
+    
+    serverParser.addArgument("-p", "--port")
+        .required(true)
+         .help("Port to be assigned to the server.\n");
+    serverParser.addArgument("-m", "--model").required(true)
+        .help("Choose parsing model.\n");
+    serverParser
+        .addArgument("-l", "--language")
+        .choices("en", "es")
+        .required(true)
+        .help(
+            "Choose language.\n");
+    serverParser.addArgument("-g", "--headFinder")
+        .choices("collins", "sem", Flags.DEFAULT_HEADFINDER)
+        .setDefault(Flags.DEFAULT_HEADFINDER).required(false)
+        .help("Choose between Collins or Semantic HeadFinder.\n");
+    serverParser.addArgument("-o", "--outputFormat").choices("oneline", "naf")
+        .setDefault(Flags.DEFAULT_OUTPUT_FORMAT).required(false)
+        .help("Choose outputFormat; it defaults to NAF.\n");
+  }
+  
+  private void loadClientParameters() {
+    
+    clientParser.addArgument("-p", "--port")
+        .required(true)
+        .help("Port of the TCP server.\n");
+    clientParser.addArgument("--host")
+        .required(false)
+        .setDefault(Flags.DEFAULT_HOSTNAME)
+        .help("Hostname or IP where the TCP server is running.\n");
+  }
 
   private Properties setAnnotateProperties(final String model,
       final String language, final String headFinder) {
@@ -270,6 +391,16 @@ public class CLI {
     annotateProperties.setProperty("language", language);
     annotateProperties.setProperty("headFinder", headFinder);
     return annotateProperties;
+  }
+  
+  private Properties setServerProperties(String port, String model, String language, String headFinder, String outputFormat) {
+    Properties serverProperties = new Properties();
+    serverProperties.setProperty("port", port);
+    serverProperties.setProperty("model", model);
+    serverProperties.setProperty("language", language);
+    serverProperties.setProperty("headFinder", headFinder);
+    serverProperties.setProperty("outputFormat", outputFormat);
+    return serverProperties;
   }
 
 }
