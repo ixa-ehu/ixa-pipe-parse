@@ -4,7 +4,7 @@
   <groupId>eus.ixa</groupId>
   <artifactId>ixa-pipe-parse</artifactId>
   <name>ixa-pipe-parse</name>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <description>ixa pipes constituent parser (ixa2.si.ehu.es/ixa-pipes)</description>
   <url>ixa2.si.ehu.es/ixa-pipes</url>
   <prerequisites>
