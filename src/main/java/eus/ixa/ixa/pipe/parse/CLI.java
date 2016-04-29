@@ -20,7 +20,6 @@ import ixa.kaflib.KAFDocument;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -73,9 +72,8 @@ public class CLI {
 
   // create Argument Parser
   ArgumentParser argParser = ArgumentParsers.newArgumentParser(
-      "ixa-pipe-parse-" + this.version + ".jar").description(
-      "ixa-pipe-parse is a multilingual Constituent Parsing module "
-          + "developed by IXA NLP Group.\n");
+      "ixa-pipe-parse-" + this.version + "-exec.jar").description(
+      "ixa-pipe-parse is the IXA pipes Constituent Parser.\n");
   /**
    * Sub parser instance.
    */
@@ -85,14 +83,6 @@ public class CLI {
    * The parser that manages the tagging sub-command.
    */
   private final Subparser annotateParser;
-  /**
-   * The parser that manages the training sub-command.
-   */
-  private final Subparser trainParser;
-  /**
-   * The parser that manages the evaluation sub-command.
-   */
-  private final Subparser evalParser;
   /**
    *  Parser to start TCP socket for server-client functionality.
    */
@@ -110,10 +100,6 @@ public class CLI {
     this.annotateParser = this.subParsers.addParser("parse")
         .help("Parsing CLI");
     loadAnnotateParameters();
-    this.trainParser = this.subParsers.addParser("train").help("Training CLI");
-    loadTrainingParameters();
-    this.evalParser = this.subParsers.addParser("eval").help("Evaluation CLI");
-    loadEvalParameters();
     serverParser = subParsers.addParser("server").help("Start TCP socket server");
     loadServerParameters();
     clientParser = subParsers.addParser("client").help("Send queries to the TCP socket server");
@@ -144,10 +130,6 @@ public class CLI {
       System.err.println("CLI options: " + this.parsedArguments);
       if (args[0].equals("parse")) {
         annotate(System.in, System.out);
-      } else if (args[0].equals("eval")) {
-        eval();
-      } else if (args[0].equals("train")) {
-        train();
       } else if (args[0].equals("server")) {
         server();
       } else if (args[0].equals("client")) {
@@ -156,7 +138,7 @@ public class CLI {
     } catch (final ArgumentParserException e) {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-parse-" + this.version
-          + ".jar" + " (parse|train|eval|server|client) -help for details");
+          + "-exec.jar" + " (tag|server|client) -help for details");
       System.exit(1);
     }
   }
@@ -203,30 +185,6 @@ public class CLI {
     bwriter.write(kafToString);
     bwriter.close();
     breader.close();
-  }
-
-  public final void train() {
-    System.err.println("Not yet ready!");
-  }
-
-  public final void eval() throws IOException {
-
-    final String lang = this.parsedArguments.getString("language");
-    final String model = this.parsedArguments.getString("model");
-    final String headFinderOption = this.parsedArguments
-        .getString("headFinder");
-    final Properties properties = setEvaluateProperties(model, lang,
-        headFinderOption);
-    final Annotate annotator = new Annotate(properties);
-    // special option to process treebank files adding headword marks
-    if (this.parsedArguments.getString("addHeads") != null) {
-      final File inputTree = new File(
-          this.parsedArguments.getString("addHeads"));
-      annotator.processTreebankWithHeadWords(inputTree);
-    } else if (this.parsedArguments.get("test") != null) {
-      final File inputTree = new File(this.parsedArguments.getString("test"));
-      annotator.parseForTesting(inputTree);
-    }
   }
   
   /**
@@ -319,33 +277,6 @@ public class CLI {
   }
 
   /**
-   * Create the main parameters available for training parse models.
-   */
-  private void loadTrainingParameters() {
-  }
-
-  private void loadEvalParameters() {
-
-    this.evalParser.addArgument("-m", "--model").required(true)
-        .help("Choose parsing model.\n");
-    this.evalParser.addArgument("-l", "--language").choices("en", "es")
-        .required(true).help("Choose language.\n");
-    this.evalParser.addArgument("-g", "--headFinder")
-        .choices("collins", "sem", Flags.DEFAULT_HEADFINDER)
-        .setDefault(Flags.DEFAULT_HEADFINDER).required(false)
-        .help("Choose between Collins or Semantic HeadFinder.\n");
-    this.evalParser
-        .addArgument("--addHeads")
-        .help(
-            "Takes a file or a directory as argument containing a parse tree in penn treebank (one line per sentence) format; this option requires --lang and --headFinder options.\n");
-    this.evalParser
-        .addArgument("--test")
-        .help(
-            "Takes a file as argument containing the tokenized text of a gold standard Penn Treebank file to process it; It produces a test file for its parseval evaluation with EVALB.\n");
-  }
-  
-
-  /**
    * Create the available parameters for NER tagging.
    */
   private void loadServerParameters() {
@@ -382,15 +313,6 @@ public class CLI {
   }
 
   private Properties setAnnotateProperties(final String model,
-      final String language, final String headFinder) {
-    final Properties annotateProperties = new Properties();
-    annotateProperties.setProperty("model", model);
-    annotateProperties.setProperty("language", language);
-    annotateProperties.setProperty("headFinder", headFinder);
-    return annotateProperties;
-  }
-
-  private Properties setEvaluateProperties(final String model,
       final String language, final String headFinder) {
     final Properties annotateProperties = new Properties();
     annotateProperties.setProperty("model", model);

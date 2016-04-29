@@ -29,8 +29,8 @@ import opennlp.tools.parser.Parse;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
-import eus.ixa.ixa.pipe.heads.CollinsHeadFinder;
-import eus.ixa.ixa.pipe.heads.HeadFinder;
+import eus.ixa.ixa.pipe.ml.parse.CollinsHeadFinder;
+import eus.ixa.ixa.pipe.ml.parse.HeadFinder;
 
 /**
  * 
@@ -180,6 +180,7 @@ public class Annotate {
     }
   }
 
+  //TODO move to ixa-pipe-convert
   /**
    * Takes a file containing Penn Treebank oneline annotation and annotates the
    * headwords, saving it to a file with the *.head extension. Optionally also
@@ -228,7 +229,7 @@ public class Annotate {
   }
 
   /**
-   * Takes as input a list of parse strings, one for line, and annotates the
+   * Takes as input a list of parse strings, one for each line, and annotates the
    * headwords
    * 
    * @param inputTrees
