@@ -1,6 +1,9 @@
 
 ixa-pipe-parse
 ==============
+[![Build Status](https://travis-ci.org/ixa-ehu/ixa-pipe-parse.svg?branch=master)](https://travis-ci.org/ixa-ehu/ixa-pipe-parse)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/apache/opennlp/master/LICENSE)
+
 ixa-pipe-parse is a statistical constituent parser for English and Spanish.
 ixa-pipe-parse is part of IXA pipes, a set of multilingual NLP tools developed
 by the IXA NLP Group [http://ixa2.si.ehu.es/ixa-pipes]. **Current version is 1.1.1**.
