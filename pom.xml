@@ -24,9 +24,6 @@
 	</developers>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.version>3.3.9</maven.version>
 		<junit.version>4.12</junit.version>
 		<maven.surefire.plugin>2.19.1</maven.surefire.plugin>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -152,15 +149,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
+				<version>3.0.1</version>
 			</plugin>
 			<plugin>
 				<groupId>ru.concerteza.buildnumber</groupId>

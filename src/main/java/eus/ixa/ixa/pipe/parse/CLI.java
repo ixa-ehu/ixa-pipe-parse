@@ -305,7 +305,7 @@ public class CLI {
         .help("Choose parsing model.\n");
     this.annotateParser
         .addArgument("-l", "--language")
-        .choices("en", "es")
+        .choices("en", "es", "it")
         .required(false)
         .help(
             "Choose language; it defaults to the language value in incoming NAF file.\n");
@@ -328,7 +328,7 @@ public class CLI {
 
     this.evalParser.addArgument("-m", "--model").required(true)
         .help("Choose parsing model.\n");
-    this.evalParser.addArgument("-l", "--language").choices("en", "es")
+    this.evalParser.addArgument("-l", "--language").choices("en", "es", "it")
         .required(true).help("Choose language.\n");
     this.evalParser.addArgument("-g", "--headFinder")
         .choices("collins", "sem", Flags.DEFAULT_HEADFINDER)
@@ -357,7 +357,7 @@ public class CLI {
         .help("Choose parsing model.\n");
     serverParser
         .addArgument("-l", "--language")
-        .choices("en", "es")
+        .choices("en", "es", "it")
         .required(true)
         .help(
             "Choose language.\n");
