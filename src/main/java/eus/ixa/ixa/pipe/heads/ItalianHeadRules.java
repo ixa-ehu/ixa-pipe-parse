@@ -35,8 +35,8 @@ import opennlp.tools.parser.GapLabeler;
 import opennlp.tools.parser.Parse;
 
 /**
-* Class for storing the Spanish head rules associated with parsing. The
-* headrules are specified in $src/main/resources/es-head-rules
+* Class for storing the Italian head rules associated with parsing using the TUTPenn corpus. The
+* headrules are specified in $src/main/resources/it-head-rules
 * 
 * NOTE: This is the very same class than the one inside
 * opennlp.tools.parser.lang.es package. The main change is the return of the getHead()

@@ -35,7 +35,7 @@ import opennlp.tools.parser.GapLabeler;
 import opennlp.tools.parser.Parse;
 
 /**
- * Class for storing the English head rules associated with parsing. The
+ * Class for storing the English head rules associated with parsing using the Penn Treebank. The
  * headrules are specified in $src/main/resources/en-head-rules
  * 
  * NOTE: This is the very same class than the one inside
