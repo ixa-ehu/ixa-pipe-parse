@@ -58,6 +58,8 @@ public class CollinsHeadFinder implements HeadFinder {
               new SpanishHeadRules(new InputStreamReader(is)));
         } else if (lang.equalsIgnoreCase("it")) {
           headRulesMap.put(lang,  new ItalianHeadRules(new InputStreamReader(is)));
+        } else if (lang.equalsIgnoreCase("ca")) {
+          headRulesMap.put(lang,  new CatalanHeadRules(new InputStreamReader(is)));
         }
         is.close();
       }
@@ -76,6 +78,8 @@ public class CollinsHeadFinder implements HeadFinder {
       headsFileInputStream = getClass().getResourceAsStream("/es-head-rules");
     } else if (lang.equals("it")) {
       headsFileInputStream = getClass().getResourceAsStream("/it-head-rules");
+    } else if (lang.equals("ca")) {
+      headsFileInputStream = getClass().getResourceAsStream("/ca-head-rules");
     }
     return headsFileInputStream;
   }

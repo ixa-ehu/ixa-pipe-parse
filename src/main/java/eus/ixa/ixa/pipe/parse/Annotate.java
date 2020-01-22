@@ -44,7 +44,7 @@ import eus.ixa.ixa.pipe.heads.HeadFinder;
 public class Annotate {
 
   private boolean markHeads;
-  private final ConstituentParsing parser;
+  private final ConstituentParser parser;
   private HeadFinder headFinder;
 
   /**
@@ -55,7 +55,7 @@ public class Annotate {
    *          the configuration properties
    */
   public Annotate(final Properties properties) {
-    this.parser = new ConstituentParsing(properties);
+    this.parser = new ConstituentParser(properties);
     annotateOptions(properties);
   }
 

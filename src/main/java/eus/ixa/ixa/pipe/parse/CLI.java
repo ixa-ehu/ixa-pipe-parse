@@ -51,7 +51,7 @@ import com.google.common.io.Files;
  * test parse file ready to be evaluated with EVALB.
  * 
  * @author ragerri
- * @version 2014-04-18
+ * @version 2020-01-22
  */
 
 public class CLI {
@@ -305,7 +305,7 @@ public class CLI {
         .help("Choose parsing model.\n");
     this.annotateParser
         .addArgument("-l", "--language")
-        .choices("en", "es", "it")
+        .choices("ca", "en", "es", "it")
         .required(false)
         .help(
             "Choose language; it defaults to the language value in incoming NAF file.\n");
@@ -328,7 +328,7 @@ public class CLI {
 
     this.evalParser.addArgument("-m", "--model").required(true)
         .help("Choose parsing model.\n");
-    this.evalParser.addArgument("-l", "--language").choices("en", "es", "it")
+    this.evalParser.addArgument("-l", "--language").choices("ca", "en", "es", "it")
         .required(true).help("Choose language.\n");
     this.evalParser.addArgument("-g", "--headFinder")
         .choices("collins", "sem", Flags.DEFAULT_HEADFINDER)
@@ -357,7 +357,7 @@ public class CLI {
         .help("Choose parsing model.\n");
     serverParser
         .addArgument("-l", "--language")
-        .choices("en", "es", "it")
+        .choices("ca", "en", "es", "it")
         .required(true)
         .help(
             "Choose language.\n");

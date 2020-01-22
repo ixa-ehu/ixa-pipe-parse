@@ -36,7 +36,7 @@ import opennlp.tools.parser.ParserModel;
  * @version 2015-09-17
  */
 
-public class ConstituentParsing {
+public class ConstituentParser {
 
   /**
    * The models to use for every language. The keys of the hash are the language
@@ -48,7 +48,7 @@ public class ConstituentParsing {
    */
   private final Parser parser;
 
-  public ConstituentParsing(final Properties properties) {
+  public ConstituentParser(final Properties properties) {
     final String lang = properties.getProperty("language");
     final String model = properties.getProperty("model");
     final ParserModel parserModel = loadModel(lang, model);
