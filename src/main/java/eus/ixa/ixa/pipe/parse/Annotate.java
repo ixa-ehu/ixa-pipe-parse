@@ -15,22 +15,21 @@
  */
 package eus.ixa.ixa.pipe.parse;
 
-import ixa.kaflib.KAFDocument;
-import ixa.kaflib.WF;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
-import opennlp.tools.parser.Parse;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import eus.ixa.ixa.pipe.heads.CollinsHeadFinder;
 import eus.ixa.ixa.pipe.heads.HeadFinder;
+import ixa.kaflib.KAFDocument;
+import ixa.kaflib.WF;
+import opennlp.tools.parser.Parse;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * 
@@ -38,7 +37,7 @@ import eus.ixa.ixa.pipe.heads.HeadFinder;
  * with or without headWords marked.
  * 
  * @author ragerri
- * @version 2014-02-03
+ * @version 2020-01-22
  * 
  */
 public class Annotate {
@@ -154,20 +153,19 @@ public class Annotate {
     return parsingDoc.toString();
   }
 
-  public void parseForTesting(final File inputText) throws IOException {
+  public void parseForTesting(final Path inputText) throws IOException {
     final StringBuffer parsingDoc = new StringBuffer();
-    if (inputText.isFile()) {
+    if (Files.isRegularFile(inputText)) {
       final List<String> inputTrees = Files
-          .readLines(inputText, Charsets.UTF_8);
+          .readAllLines(inputText, StandardCharsets.UTF_8);
       for (final String sentence : inputTrees) {
         final Parse parsedSentence = this.parser.parse(sentence, 1)[0];
         parsedSentence.show(parsingDoc);
         parsingDoc.append("\n");
       }
-      final File outfile = new File(Files.getNameWithoutExtension(inputText
-          .getPath()) + ".test");
+      Path outfile = Files.createFile(Paths.get(inputText.toString() + ".test"));
       System.err.println("Writing test parse file to " + outfile);
-      Files.write(parsingDoc.toString(), outfile, Charsets.UTF_8);
+      Files.write(outfile, parsingDoc.toString().getBytes(StandardCharsets.UTF_8));
     } else {
       System.out.println("Choose a correct file!");
       System.exit(1);
@@ -185,35 +183,29 @@ public class Annotate {
    * @throws IOException
    *           if io error
    */
-  public void processTreebankWithHeadWords(final File dir) throws IOException {
+  public void processTreebankWithHeadWords(final Path dir) throws IOException {
     // process one file
-    if (dir.isFile()) {
-      final List<String> inputTrees = Files.readLines(
-          new File(dir.getCanonicalPath()), Charsets.UTF_8);
-      final File outfile = new File(
-          Files.getNameWithoutExtension(dir.getPath()) + ".head");
+    if (Files.isRegularFile(dir)) {
+      final List<String> inputTrees = Files.readAllLines(
+          dir, StandardCharsets.UTF_8);
+      Path outfile = Files.createFile(Paths.get(dir.toString() + ".head"));
       final String outTree = addHeadWordsToTreebank(inputTrees);
-      Files.write(outTree, outfile, Charsets.UTF_8);
+      Files.write(outfile, outTree.getBytes(StandardCharsets.UTF_8));
       System.err.println(">> Wrote headWords to " + outfile);
     } else {
       // recursively process directories
-      final File listFile[] = dir.listFiles();
-      if (listFile != null) {
-        for (final File element : listFile) {
-          if (element.isDirectory()) {
+      try (DirectoryStream<Path> filesDir = Files.newDirectoryStream(dir)) {
+        for (Path element : filesDir) {
+          if (Files.isDirectory(element)) {
             processTreebankWithHeadWords(element);
           } else {
             try {
-              final List<String> inputTrees = Files.readLines(
-                  new File(Files.getNameWithoutExtension(element
-                      .getCanonicalPath())), Charsets.UTF_8);
-              final File outfile = new File(
-                  Files.getNameWithoutExtension(element.getPath()) + ".head");
+              final List<String> inputTrees = Files.readAllLines(element, StandardCharsets.UTF_8);
+              final Path outfile =  Files.createFile(Paths.get(element.toString() + ".head"));
               final String outTree = addHeadWordsToTreebank(inputTrees);
-              Files.write(outTree, outfile, Charsets.UTF_8);
+              Files.write(outfile, outTree.getBytes(StandardCharsets.UTF_8));
               System.err.println(">> Wrote headWords to " + outfile);
-            } catch (final FileNotFoundException noFile) {
-              continue;
+            } catch (final FileNotFoundException ignored) {
             }
           }
         }
@@ -225,7 +217,7 @@ public class Annotate {
    * Takes as input a list of parse strings, one for line, and annotates the
    * headwords
    * 
-   * @param inputTrees
+   * @param inputTrees the parse strings
    * @return a list of parse trees with headwords annotated
    */
   private String addHeadWordsToTreebank(final List<String> inputTrees) {

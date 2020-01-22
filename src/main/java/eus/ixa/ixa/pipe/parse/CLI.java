@@ -142,17 +142,23 @@ public class CLI {
     try {
       this.parsedArguments = this.argParser.parseArgs(args);
       System.err.println("CLI options: " + this.parsedArguments);
-      if (args[0].equals("parse")) {
-        annotate(System.in, System.out);
-      } else if (args[0].equals("eval")) {
-        eval();
-      } else if (args[0].equals("train")) {
-        train();
-      } else if (args[0].equals("server")) {
-        server();
-      } else if (args[0].equals("client")) {
-        client(System.in, System.out);
-      }
+        switch (args[0]) {
+        case "parse":
+            annotate(System.in, System.out);
+            break;
+        case "eval":
+            eval();
+            break;
+        case "train":
+            train();
+            break;
+        case "server":
+            server();
+            break;
+        case "client":
+            client(System.in, System.out);
+            break;
+        }
     } catch (final ArgumentParserException e) {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-parse-" + this.version
