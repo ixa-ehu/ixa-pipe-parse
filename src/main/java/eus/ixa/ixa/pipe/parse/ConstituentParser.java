@@ -42,7 +42,7 @@ public class ConstituentParser {
    * The models to use for every language. The keys of the hash are the language
    * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, ParserModel> parseModels = new ConcurrentHashMap<String, ParserModel>();
+  private static final ConcurrentHashMap<String, ParserModel> parseModels = new ConcurrentHashMap<>();
   /**
    * The parser.
    */
@@ -55,7 +55,7 @@ public class ConstituentParser {
     this.parser = ParserFactory.create(parserModel);
   }
 
-  private final ParserModel loadModel(final String lang, final String model) {
+  private ParserModel loadModel(final String lang, final String model) {
     final long lStartTime = new Date().getTime();
     try {
       synchronized (parseModels) {
@@ -87,9 +87,8 @@ public class ConstituentParser {
    * 
    * */
   public Parse[] parse(final String sentence, final int numParses) {
-    final Parse[] parsedSentence = ParserTool.parseLine(sentence, this.parser,
+    return ParserTool.parseLine(sentence, this.parser,
         numParses);
-    return parsedSentence;
   }
 
 }

@@ -17,30 +17,17 @@
 package eus.ixa.ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Properties;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.inf.ArgumentParser;
-import net.sourceforge.argparse4j.inf.ArgumentParserException;
-import net.sourceforge.argparse4j.inf.Namespace;
-import net.sourceforge.argparse4j.inf.Subparser;
-import net.sourceforge.argparse4j.inf.Subparsers;
-
+import net.sourceforge.argparse4j.inf.*;
 import org.jdom2.JDOMException;
 
-import com.google.common.io.Files;
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 /**
  * This is the main class of ixa-pipe-parse a constituent shift-reduce parser
@@ -76,12 +63,7 @@ public class CLI {
       "ixa-pipe-parse-" + this.version + ".jar").description(
       "ixa-pipe-parse is a multilingual Constituent Parsing module "
           + "developed by IXA NLP Group.\n");
-  /**
-   * Sub parser instance.
-   */
-  private final Subparsers subParsers = this.argParser.addSubparsers().help(
-      "sub-command help");
-  /**
+    /**
    * The parser that manages the tagging sub-command.
    */
   private final Subparser annotateParser;
@@ -107,12 +89,14 @@ public class CLI {
    * line parameters.
    */
   public CLI() {
-    this.annotateParser = this.subParsers.addParser("parse")
+    Subparsers subParsers = this.argParser.addSubparsers()
+          .help("sub-command help");
+    this.annotateParser = subParsers.addParser("parse")
         .help("Parsing CLI");
     loadAnnotateParameters();
-    this.trainParser = this.subParsers.addParser("train").help("Training CLI");
+    this.trainParser = subParsers.addParser("train").help("Training CLI");
     loadTrainingParameters();
-    this.evalParser = this.subParsers.addParser("eval").help("Evaluation CLI");
+    this.evalParser = subParsers.addParser("eval").help("Evaluation CLI");
     loadEvalParameters();
     serverParser = subParsers.addParser("server").help("Start TCP socket server");
     loadServerParameters();
@@ -156,7 +140,7 @@ public class CLI {
             server();
             break;
         case "client":
-            client(System.in, System.out);
+            client();
             break;
         }
     } catch (final ArgumentParserException e) {
@@ -171,16 +155,16 @@ public class CLI {
       final OutputStream outputStream) throws IOException, JDOMException {
 
     final BufferedReader breader = new BufferedReader(new InputStreamReader(
-        inputStream, "UTF-8"));
+        inputStream, StandardCharsets.UTF_8));
     final BufferedWriter bwriter = new BufferedWriter(new OutputStreamWriter(
-        outputStream, "UTF-8"));
+        outputStream, StandardCharsets.UTF_8));
     final KAFDocument kaf = KAFDocument.createFromStream(breader);
     final String model = this.parsedArguments.getString("model");
     final String headFinderOption = this.parsedArguments
         .getString("headFinder");
     final String outputFormat = this.parsedArguments.getString("outputFormat");
     // language parameter
-    String lang = null;
+    String lang;
     if (this.parsedArguments.getString("language") != null) {
       lang = this.parsedArguments.getString("language");
       if (!kaf.getLang().equalsIgnoreCase(lang)) {
@@ -194,11 +178,11 @@ public class CLI {
         headFinderOption);
     final KAFDocument.LinguisticProcessor newLp = kaf.addLinguisticProcessor(
         "constituency",
-        "ixa-pipe-parse-" + Files.getNameWithoutExtension(model), this.version
+        "ixa-pipe-parse-" + Paths.get(model).getFileName(), this.version
             + "-" + this.commit);
     newLp.setBeginTimestamp();
     final Annotate annotator = new Annotate(properties);
-    String kafToString = null;
+    String kafToString;
     if (outputFormat.equalsIgnoreCase("oneline")) {
       kafToString = annotator.parseToOneline(kaf);
     } else {
@@ -226,11 +210,10 @@ public class CLI {
     final Annotate annotator = new Annotate(properties);
     // special option to process treebank files adding headword marks
     if (this.parsedArguments.getString("addHeads") != null) {
-      final File inputTree = new File(
-          this.parsedArguments.getString("addHeads"));
+      Path inputTree = Paths.get(parsedArguments.getString("addHeads"));
       annotator.processTreebankWithHeadWords(inputTree);
     } else if (this.parsedArguments.get("test") != null) {
-      final File inputTree = new File(this.parsedArguments.getString("test"));
+      Path inputTree = Paths.get(parsedArguments.getString("test"));
       annotator.parseForTesting(inputTree);
     }
   }
@@ -253,26 +236,20 @@ public class CLI {
   
   /**
    * The client to query the TCP server for annotation.
-   * 
-   * @param inputStream
-   *          the stdin
-   * @param outputStream
-   *          stdout
    */
-  public final void client(final InputStream inputStream,
-      final OutputStream outputStream) {
+  public final void client() {
 
     String host = parsedArguments.getString("host");
     String port = parsedArguments.getString("port");
     try (Socket socketClient = new Socket(host, Integer.parseInt(port));
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
-            System.in, "UTF-8"));
-        BufferedWriter outToUser = new BufferedWriter(new OutputStreamWriter(
-            System.out, "UTF-8"));
-        BufferedWriter outToServer = new BufferedWriter(new OutputStreamWriter(
-            socketClient.getOutputStream(), "UTF-8"));
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(
-            socketClient.getInputStream(), "UTF-8"));) {
+         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
+            System.in, StandardCharsets.UTF_8));
+         BufferedWriter outToUser = new BufferedWriter(new OutputStreamWriter(
+            System.out, StandardCharsets.UTF_8));
+         BufferedWriter outToServer = new BufferedWriter(new OutputStreamWriter(
+            socketClient.getOutputStream(), StandardCharsets.UTF_8));
+         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(
+            socketClient.getInputStream(), StandardCharsets.UTF_8))) {
 
       // send data to server socket
       StringBuilder inText = new StringBuilder();

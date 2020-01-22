@@ -1,5 +1,5 @@
 /*
- *Copyright 2015 Rodrigo Agerri
+ *Copyright 2020 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,21 +17,14 @@
 package eus.ixa.ixa.pipe.parse;
 
 import ixa.kaflib.KAFDocument;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Properties;
-
 import org.jdom2.JDOMException;
 
-import com.google.common.io.Files;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 /**
  * 
@@ -53,11 +46,11 @@ public class ConstituentParserServer {
   /**
    * The model.
    */
-  private String model = null;
+  private String model;
   /**
    * The annotation output format, one of NAF (default) and oneline penn treebank.
    */
-  private String outputFormat = null;
+  private String outputFormat;
   
   /**
    * Construct a NameFinder server.
@@ -67,14 +60,14 @@ public class ConstituentParserServer {
    */
   public ConstituentParserServer(Properties properties) {
 
-    Integer port = Integer.parseInt(properties.getProperty("port"));
+    int port = Integer.parseInt(properties.getProperty("port"));
     model = properties.getProperty("model");
     outputFormat = properties.getProperty("outputFormat");
     
     String kafToString;
     ServerSocket socketServer = null;
     Socket activeSocket;
-    BufferedReader inFromClient = null;
+    BufferedReader inFromClient;
     BufferedWriter outToClient = null;
 
     try {
@@ -85,8 +78,10 @@ public class ConstituentParserServer {
       while (true) {
         try {
           activeSocket = socketServer.accept();
-          inFromClient = new BufferedReader(new InputStreamReader(activeSocket.getInputStream(), "UTF-8"));
-          outToClient = new BufferedWriter(new OutputStreamWriter(activeSocket.getOutputStream(), "UTF-8"));
+          inFromClient = new BufferedReader(new InputStreamReader(activeSocket.getInputStream(),
+              StandardCharsets.UTF_8));
+          outToClient = new BufferedWriter(new OutputStreamWriter(activeSocket.getOutputStream(),
+              StandardCharsets.UTF_8));
           //get data from client
           String stringFromClient = getClientData(inFromClient);
           // annotate
@@ -97,10 +92,12 @@ public class ConstituentParserServer {
           continue;
         } catch (UnsupportedEncodingException e) {
           kafToString = "\n-> ERROR: UTF-8 not supported!!\n";
+          assert outToClient != null;
           sendDataToClient(outToClient, kafToString);
           continue;
         } catch (IOException e) {
           kafToString = "\n -> ERROR: Input data not correct!!\n";
+          assert outToClient != null;
           sendDataToClient(outToClient, kafToString);
           continue;
         }
@@ -116,6 +113,7 @@ public class ConstituentParserServer {
     } finally {
       System.out.println("closing tcp socket...");
       try {
+        assert socketServer != null;
         socketServer.close();
       } catch (IOException e) {
         e.printStackTrace();
@@ -179,10 +177,10 @@ public class ConstituentParserServer {
     KAFDocument kaf = KAFDocument.createFromStream(clientReader);
     final KAFDocument.LinguisticProcessor newLp = kaf.addLinguisticProcessor(
         "constituency",
-        "ixa-pipe-parse-" + Files.getNameWithoutExtension(model), this.version
+        "ixa-pipe-parse-" + Paths.get(model).getFileName(), this.version
             + "-" + this.commit);
     newLp.setBeginTimestamp();
-    String kafToString = null;
+    String kafToString;
     if (outputFormat.equalsIgnoreCase("oneline")) {
       kafToString = annotator.parseToOneline(kaf);
     } else {
