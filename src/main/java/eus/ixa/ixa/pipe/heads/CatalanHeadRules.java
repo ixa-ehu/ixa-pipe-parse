@@ -35,19 +35,19 @@ import opennlp.tools.parser.GapLabeler;
 import opennlp.tools.parser.Parse;
 
 /**
-* Class for storing the Catalan head rules associated with parsing using the Ancora Corpus. The
-* headrules are specified in $src/main/resources/ca-head-rules
-* 
-* NOTE: This is the very same class than the one inside
-* opennlp.tools.parser.lang.es package. The main change is the return of the getHead()
-* method: Every return constituents[i].getHead() has been replaced by the
-* same return statement without the .getHead() method call.
-* 
-* Other changes include removal of deprecated methods we do not need to use and
-* adding some other methods for debugging.
-* @author ragerri
-* @version 2020-01-22
-*/
+ * Class for storing the Catalan head rules associated with parsing. The
+ * headrules are specified in $src/main/resources/ca-head-rules
+ *
+ * NOTE: This is the very same class than the one inside
+ * opennlp.tools.parser.lang.es package. The main change is the return of the getHead()
+ * method: Every return constituents[i].getHead() has been replaced by the
+ * same return statement without the .getHead() method call.
+ *
+ * Other changes include removal of deprecated methods we do not need to use and
+ * adding some other methods for debugging.
+ * @author ragerri
+ * @version 2020-01-22
+ */
 public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
     GapLabeler {
 
@@ -88,10 +88,10 @@ public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
 
   /**
    * Creates a new set of head rules based on the specified reader.
-   * 
+   *
    * @param rulesReader
    *          the head rules reader.
-   * 
+   *
    * @throws IOException
    *           if the head rules reader can not be read.
    */
@@ -116,33 +116,35 @@ public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
       return null;
     }
     HeadRule hr;
+    // if (type.equals("SN") || type.equals("GRUP.NOM")) {
     if (type.startsWith("SN") || type.startsWith("GRUP.NOM")) {
-      final String[] tags1 = { "NCMS000", "NCFS000", "NCCS000", "NCMS00D",
-          "NCMS00A", "NCFS00D", "NCFS00A", "NCCS00A", "NCCS00D", "NP0000",
-          "NCMP000", "NCFP000", "NCCP000", "NCMP00D", "NCMP00A", "NCFP00D",
-          "NCFP00A", "NCCP00A", "NCCP00D", "GRUP.NOM", "AQAMS0", "AQAFS0",
-          "AQACS0", "AQAMN0", "AQAFN0", "AQACN0", "AQAMP0", "AQAFP0", "AQACP0",
-          "AQCMS0", "AQCFS0", "AQCCS0", "AQCMN0", "AQCFN0", "AQCCN0", "AQCMP0",
-          "AQCFP0", "AQCCP0" };
+      final String[] tags1 = { "NC.*S.*", "NP.*","NC.*P.*", "GRUP\\.NOM", "AQA.*","AQC.*"};
 
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags1.length - 1; ti >= 0; ti--) {
-          if (constituents[ci].getType().equals(tags1[ti])) {
+          if (constituents[ci].getType().matches(tags1[ti])) {
             return constituents[ci];
           }
         }
       }
       for (final Parse constituent : constituents) {
-        // if (constituents[ci].getType().equals("SN")) {
         if (constituent.getType().startsWith("SN")
             || constituent.getType().startsWith("GRUP.NOM")) {
           return constituent;
         }
       }
-      final String[] tags2 = { "$", "SA", "S.A", "GRUP.A" };
+      final String[] tags2 = { "\\$", "SA", "S\\.A", "GRUP\\.A"};
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags2.length - 1; ti >= 0; ti--) {
-          if (constituents[ci].getType().equals(tags2[ti])) {
+          if (constituents[ci].getType().matches(tags2[ti])) {
+            return constituents[ci];
+          }
+        }
+      }
+      final String[] tags3 = { "AQ0.*", "AQS.*", "AQ[AC].*","AO.*","GRUP\\.A","S\\.A","RG","RN","GRUP\\.NOM" };
+      for (int ci = constituents.length - 1; ci >= 0; ci--) {
+        for (int ti = tags3.length - 1; ti >= 0; ti--) {
+          if (constituents[ci].getType().matches(tags3[ti])) {
             return constituents[ci];
           }
         }
@@ -151,18 +153,6 @@ public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags4.length - 1; ti >= 0; ti--) {
           if (constituents[ci].getType().equals(tags4[ti])) {
-            return constituents[ci];
-          }
-        }
-      }
-      final String[] tags3 = { "AQ0MS0", "AQ0FS0", "AQ0CS0", "AQ0MSP",
-          "AQ0FSP", "AQ0CSP", "AQ0CNP", "AQ0MP0", "AQ0FP0", "AQ0CP0", "AQ0MPP",
-          "AQ0FPP", "AQ0CPP", "AQ0MN0", "AQ0FN0", "AQ0CN0", "AQ0MNP", "AQ0FNP",
-          "AQ0CNP", "AQSMS0", "AQSFS0", "AQSCS0", "AQSMN0", "AQSFN0", "AQSCN0",
-          "AQSMP0", "AQSFP0", "AQSCP0", "RG", "RN", "GRUP.NOM" };
-      for (int ci = constituents.length - 1; ci >= 0; ci--) {
-        for (int ti = tags3.length - 1; ti >= 0; ti--) {
-          if (constituents[ci].getType().equals(tags3[ti])) {
             return constituents[ci];
           }
         }
@@ -177,8 +167,7 @@ public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
           for (Parse constituent : constituents) {
             // TODO: Examine this function closely are we infra-heading or
             // over-heading?
-            if (constituent.getType().equals(tag) || constituent.getType()
-                .startsWith(tag)) {
+            if (constituent.getType().matches(tag)) {
               // if (constituents[ci].getType().equals(tags[ti])) {
               return constituent;
             }
@@ -188,7 +177,7 @@ public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
       } else {
         for (String tag : tags) {
           for (int ci = cl - 1; ci >= 0; ci--) {
-            if (constituents[ci].getType().equals(tag)) {
+            if (constituents[ci].getType().matches(tag)) {
               return constituents[ci];
             }
           }
@@ -251,7 +240,7 @@ public class CatalanHeadRules implements opennlp.tools.parser.HeadRules,
    * <p>
    * After the entries have been written, the writer is flushed. The writer
    * remains open after this method returns.
-   * 
+   *
    * @param writer
    *          the writer
    * @throws IOException
