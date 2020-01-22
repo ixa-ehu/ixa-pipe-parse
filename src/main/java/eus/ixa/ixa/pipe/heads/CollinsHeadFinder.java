@@ -36,7 +36,7 @@ import opennlp.tools.parser.Parse;
  */
 public class CollinsHeadFinder implements HeadFinder {
 
-  private static Map<String, HeadRules> headRulesMap = new HashMap<String, HeadRules>();
+  private static Map<String, HeadRules> headRulesMap = new HashMap<>();
   private final HeadRules headRules;
   private static boolean DEBUG = false;
   public static final String HEADMARK = "=H";
@@ -72,14 +72,19 @@ public class CollinsHeadFinder implements HeadFinder {
   private InputStream getHeadRulesFile(final String lang) {
 
     InputStream headsFileInputStream = null;
-    if (lang.equals("en")) {
+    switch (lang) {
+    case "en":
       headsFileInputStream = getClass().getResourceAsStream("/en-head-rules");
-    } else if (lang.equals("es")) {
+      break;
+    case "es":
       headsFileInputStream = getClass().getResourceAsStream("/es-head-rules");
-    } else if (lang.equals("it")) {
+      break;
+    case "it":
       headsFileInputStream = getClass().getResourceAsStream("/it-head-rules");
-    } else if (lang.equals("ca")) {
+      break;
+    case "ca":
       headsFileInputStream = getClass().getResourceAsStream("/ca-head-rules");
+      break;
     }
     return headsFileInputStream;
   }
@@ -95,7 +100,7 @@ public class CollinsHeadFinder implements HeadFinder {
       throw new IllegalArgumentException(
           "Can't return head of null or leaf Parse.");
     }
-    final LinkedList<Parse> nodes = new LinkedList<Parse>();
+    final LinkedList<Parse> nodes = new LinkedList<>();
     nodes.add(parse);
     // This is a recursive iteration over the whole parse tree
     while (!nodes.isEmpty()) {

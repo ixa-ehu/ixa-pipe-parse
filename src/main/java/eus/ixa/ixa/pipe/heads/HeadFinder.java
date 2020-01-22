@@ -33,6 +33,6 @@ public interface HeadFinder {
    * @param parse
    *          the parse object
    */
-  public void printHeads(Parse parse);
+  void printHeads(Parse parse);
 
 }

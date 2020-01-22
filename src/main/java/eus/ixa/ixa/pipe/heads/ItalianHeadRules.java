@@ -99,7 +99,7 @@ public class ItalianHeadRules implements opennlp.tools.parser.HeadRules,
     final BufferedReader in = new BufferedReader(rulesReader);
     readHeadRules(in);
 
-    this.punctSet = new HashSet<String>();
+    this.punctSet = new HashSet<>();
     this.punctSet.add(".");
     this.punctSet.add(",");
     this.punctSet.add("``");
@@ -112,7 +112,7 @@ public class ItalianHeadRules implements opennlp.tools.parser.HeadRules,
   }
 
   public Parse getHead(final Parse[] constituents, final String type) {
-    if (constituents[0].getType() == AbstractBottomUpParser.TOK_NODE) {
+    if (constituents[0].getType().equals(AbstractBottomUpParser.TOK_NODE)) {
       return null;
     }
     HeadRule hr;
@@ -161,22 +161,22 @@ public class ItalianHeadRules implements opennlp.tools.parser.HeadRules,
       final int cl = constituents.length;
       final int tl = tags.length;
       if (hr.leftToRight) {
-        for (int ti = 0; ti < tl; ti++) {
-          for (int ci = 0; ci < cl; ci++) {
+        for (String tag : tags) {
+          for (Parse constituent : constituents) {
             // TODO: Examine this function closely are we infra-heading or
             // over-heading?
-            if (constituents[ci].getType().equals(tags[ti])
-                || constituents[ci].getType().startsWith(tags[ti])) {
+            if (constituent.getType().equals(tag) || constituent.getType()
+                .startsWith(tag)) {
               // if (constituents[ci].getType().equals(tags[ti])) {
-              return constituents[ci];
+              return constituent;
             }
           }
         }
         return constituents[0];
       } else {
-        for (int ti = 0; ti < tl; ti++) {
+        for (String tag : tags) {
           for (int ci = cl - 1; ci >= 0; ci--) {
-            if (constituents[ci].getType().equals(tags[ti])) {
+            if (constituents[ci].getType().equals(tag)) {
               return constituents[ci];
             }
           }

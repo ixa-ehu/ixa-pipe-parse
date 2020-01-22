@@ -86,8 +86,8 @@ public class Annotate {
    * It takes an array of tokens and outputs a string with tokens joined by a
    * whitespace.
    * 
-   * @param array
-   *          of tokens
+   * @param tokens
+   *          an array of words
    * @return string representing one sentence for each array
    */
   private String getSentenceFromTokens(final String[] tokens) {
@@ -95,17 +95,15 @@ public class Annotate {
     for (final String token : tokens) {
       sb.append(token).append(" ");
     }
-    final String sentence = sb.toString();
-    return sentence;
+    return sb.toString();
   }
 
   /**
    * @param kaf
    *          document containing WF and Term elements
    * @return StringBuffer containing the Parse tree
-   * @throws IOException
    */
-  private StringBuffer getParse(final KAFDocument kaf) throws IOException {
+  private StringBuffer getParse(final KAFDocument kaf) {
     final StringBuffer parsingDoc = new StringBuffer();
     final List<List<WF>> sentences = kaf.getSentences();
     for (final List<WF> sentence : sentences) {
@@ -136,10 +134,8 @@ public class Annotate {
    * 
    * @param kaf
    *          document containing WF and Term elements
-   * @throws IOException
-   *           if io error
    */
-  public void parseToKAF(final KAFDocument kaf) throws IOException {
+  public void parseToKAF(final KAFDocument kaf) {
     final StringBuffer parsingDoc = getParse(kaf);
     try {
       kaf.addConstituencyFromParentheses(parsingDoc.toString());
@@ -152,10 +148,8 @@ public class Annotate {
    * @param kaf
    *          document containing WF and Term elements
    * @return parse tree into plain text
-   * @throws IOException
-   *           if io error
    */
-  public String parseToOneline(final KAFDocument kaf) throws IOException {
+  public String parseToOneline(final KAFDocument kaf) {
     final StringBuffer parsingDoc = getParse(kaf);
     return parsingDoc.toString();
   }
