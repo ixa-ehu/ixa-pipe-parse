@@ -58,7 +58,7 @@ public class ConstituentParserServer {
    * @param properties
    *          the properties
    */
-  public ConstituentParserServer(Properties properties) {
+  @SuppressWarnings("InfiniteLoopStatement") public ConstituentParserServer(Properties properties) {
 
     int port = Integer.parseInt(properties.getProperty("port"));
     model = properties.getProperty("model");
